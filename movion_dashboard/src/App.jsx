@@ -54,6 +54,7 @@ function App() {
     capex: 190000,
     personnelCost: 37500,
     commercialPercent: 15,
+    maintenancePercent: 3,
   };
 
   const [showSettings, setShowSettings] = useState(false);
@@ -95,13 +96,14 @@ function App() {
     const cPers = Number(config.personnelCost) || 0;
     const cComm = Number(config.commercialPercent) || 0;
     const cCapex = Number(config.capex) || 0;
+    const cMaint = Number(config.maintenancePercent) || 0;
 
     const stepSales = salesY5 / 5;
     const stepFleet = fleetY5 / 5;
     
     let fData = [];
     let uData = [];
-    let totProd = 0, totLog = 0, totPers = 0, totComm = 0;
+    let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0;
     
     const personnelGrowth = [3, 4, 5, 6, 6];
     let totalUnitsProducedOverall = 0;
@@ -125,14 +127,16 @@ function App() {
       
       let costPersonnel = personnelGrowth[i] * cPers;
       let costCommercial = revenue * (cComm / 100);
+      let costMaintenance = revenue * (cMaint / 100);
       let capexy = i === 0 ? cCapex : 0;
       
-      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - capexy;
+      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - costMaintenance - capexy;
       
       totProd += costProd;
       totLog += costLogistics;
       totPers += costPersonnel;
       totComm += costCommercial;
+      totMaint += costMaintenance;
       totalUnitsProducedOverall += unitsProduced;
 
       fData.push({
@@ -142,6 +146,7 @@ function App() {
         logistics: -costLogistics,
         personnel: -costPersonnel,
         commercial: -costCommercial,
+        maintenance: -costMaintenance,
         capex: -capexy,
         ebit,
         grossMargin: revenue - costProd
@@ -164,6 +169,7 @@ function App() {
       { name: 'Logistica (Sped/Ritiri)', value: totLog, color: '#ea580c' },
       { name: 'Personale', value: totPers, color: '#2563eb' },
       { name: 'Commerciale', value: totComm, color: '#059669' },
+      { name: 'Manutenzione', value: totMaint, color: '#f59e0b' },
     ];
 
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
@@ -257,6 +263,10 @@ function App() {
           <div className="setting-group">
             <label>Provvigioni Commerciali (%)</label>
             <input type="number" name="commercialPercent" value={config.commercialPercent} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Costo Manutenzione (%)</label>
+            <input type="number" name="maintenancePercent" value={config.maintenancePercent} onChange={handleChange} />
           </div>
         </div>
       )}
@@ -393,10 +403,14 @@ function App() {
                 <td style={{ paddingLeft: '20px', color: '#64748b' }}>Commerciale e Marketing ({config.commercialPercent}%)</td>
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.commercial)}</td>)}
               </tr>
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Manutenzione e Ricambi ({config.maintenancePercent}%)</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.maintenance)}</td>)}
+              </tr>
               
               <tr style={{ backgroundColor: '#fff7ed' }}>
                 <td style={{ fontWeight: 600, color: '#c2410c' }}>Subtotale OPEX</td>
-                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial)}</td>)}
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial + d.maintenance)}</td>)}
               </tr>
 
               <tr>
