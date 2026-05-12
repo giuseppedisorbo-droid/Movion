@@ -156,9 +156,14 @@ function App() {
           <button className="outline" onClick={() => setShowSettings(!showSettings)}>
             <Settings size={18} /> Variabili
           </button>
-          <button onClick={() => window.print()}>
-            <Download size={18} /> Scarica PDF
+          <button className="outline" onClick={() => window.print()}>
+            Stampa Grafici
           </button>
+          <a href="/Business_Plan_Movion.pdf" download style={{ textDecoration: 'none' }}>
+            <button>
+              <Download size={18} /> Scarica Relazione
+            </button>
+          </a>
         </div>
       </header>
 
