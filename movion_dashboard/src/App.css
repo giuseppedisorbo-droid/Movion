@@ -2,16 +2,16 @@
 
 :root {
   /* Tema Chiaro (Light Mode) */
-  --bg-primary: #f8fafc; /* Sfondo generale grigio chiarissimo */
-  --bg-secondary: #ffffff; /* Sfondo bianco per le card */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --text-primary: #0f172a; /* Testo scuro principale */
-  --text-secondary: #64748b; /* Testo grigio secondario */
-  --accent-primary: #2563eb; /* Blu brillante */
-  --accent-secondary: #ea580c; /* Arancione vibrante */
-  --success: #059669; /* Verde scuro per contrasto su bianco */
-  --danger: #dc2626; /* Rosso intenso */
-  --border-color: #e2e8f0; /* Bordi leggeri */
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --accent-primary: #2563eb;
+  --accent-secondary: #ea580c;
+  --success: #059669;
+  --danger: #dc2626;
+  --border-color: #e2e8f0;
 }
 
 * {
@@ -74,11 +74,65 @@ h1, h2, h3, h4, h5 {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-actions button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+}
+
+.header-actions button.outline {
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  box-shadow: none;
+}
+.header-actions button.outline:hover {
+  background: rgba(37, 99, 235, 0.05);
+  transform: translateY(-2px);
+}
+
+.settings-panel {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.setting-group label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.setting-group input {
+  padding: 0.6rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  transition: border-color 0.2s;
+}
+
+.setting-group input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
 }
 
 .grid-cards {
@@ -232,7 +286,6 @@ h1, h2, h3, h4, h5 {
 .badge.orange { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
 .badge.green { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .charts-section {
     grid-template-columns: 1fr;

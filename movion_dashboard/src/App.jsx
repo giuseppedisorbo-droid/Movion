@@ -1,25 +1,9 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon, Settings } from 'lucide-react';
 import './App.css';
-
-// Dati finanziari aggiornati
-const financialData = [
-  { year: 'Anno 1', revenue: 300000, production: -44000, logistics: -35900, personnel: -112500, commercial: -45000, ebit: -127400 },
-  { year: 'Anno 2', revenue: 600000, production: -53000, logistics: -71800, personnel: -150000, commercial: -90000, ebit: 235200 },
-  { year: 'Anno 3', revenue: 900000, production: -62000, logistics: -107700, personnel: -187500, commercial: -135000, ebit: 407800 },
-  { year: 'Anno 4', revenue: 1200000, production: -71000, logistics: -143600, personnel: -225000, commercial: -180000, ebit: 580400 },
-  { year: 'Anno 5', revenue: 1500000, production: -80000, logistics: -179500, personnel: -225000, commercial: -225000, ebit: 790500 },
-];
-
-const opexBreakdown5Years = [
-  { name: 'Produzione & Accessori', value: 310000, color: '#64748b' }, // Grigio
-  { name: 'Logistica (Spedizioni/Ritiri)', value: 538500, color: '#ea580c' }, // Arancione
-  { name: 'Personale (Fino a 6 u.)', value: 900000, color: '#2563eb' }, // Blu
-  { name: 'Commerciale e Marketing', value: 675000, color: '#059669' }, // Verde
-];
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
@@ -58,53 +42,181 @@ function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "b
 }
 
 function App() {
+  const [showSettings, setShowSettings] = useState(false);
+  const [config, setConfig] = useState({
+    targetRevenueY5: 1500000,
+    priceSale: 5000,
+    priceRental: 300,
+    rentalYieldMonths: 10,
+    costProduction: 500,
+    costLogistics: 50,
+    capex: 190000,
+    personnelCost: 37500,
+    commercialPercent: 15,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setConfig(prev => ({ ...prev, [name]: Number(value) }));
+  };
+
+  // Calcolo Dinamico di tutto il BP
+  const { financialData, totals, kpis } = useMemo(() => {
+    const step = config.targetRevenueY5 / 5;
+    let data = [];
+    let totProd = 0, totLog = 0, totPers = 0, totComm = 0;
+    
+    // Assumiamo che le unità di personale crescano organicamente con i ricavi (hardcoded growth logic)
+    const personnelGrowth = [3, 4, 5, 6, 6];
+
+    for (let i = 0; i < 5; i++) {
+      let revenue = step * (i + 1);
+      
+      // Assumiamo sempre 70% noleggio e 30% vendita come da target fisso, o calcoliamolo.
+      let revRental = revenue * 0.70;
+      let revSale = revenue * 0.30;
+      
+      let salesUnits = revSale / config.priceSale;
+      let rentalYieldPerDevice = config.rentalYieldMonths * config.priceRental;
+      let rentalFleet = revRental / rentalYieldPerDevice; // flotta totale operativa necessaria in quell'anno
+      
+      // Unità da produrre quell'anno = vendite + nuovi noleggi
+      let prevFleet = i === 0 ? 0 : ((step * i) * 0.70) / rentalYieldPerDevice;
+      let newRentalUnits = rentalFleet - prevFleet;
+      let unitsProduced = salesUnits + newRentalUnits;
+      
+      let costProd = unitsProduced * config.costProduction;
+      
+      // Logistica: (flotta * mesi rotazione) + vendite = numero di spedizioni totali
+      let logisticsCount = (rentalFleet * config.rentalYieldMonths) + salesUnits;
+      let costLogistics = logisticsCount * config.costLogistics;
+      
+      let costPersonnel = personnelGrowth[i] * config.personnelCost;
+      let costCommercial = revenue * (config.commercialPercent / 100);
+      let capexy = i === 0 ? config.capex : 0;
+      
+      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - capexy;
+      
+      totProd += costProd;
+      totLog += costLogistics;
+      totPers += costPersonnel;
+      totComm += costCommercial;
+
+      data.push({
+        year: `Anno ${i + 1}`,
+        revenue,
+        production: -costProd,
+        logistics: -costLogistics,
+        personnel: -costPersonnel,
+        commercial: -costCommercial,
+        capex: -capexy,
+        ebit,
+        grossMargin: revenue - costProd,
+        fleet: rentalFleet,
+        unitsSold: salesUnits
+      });
+    }
+
+    const totalOpex = [
+      { name: 'Produzione & Accessori', value: totProd, color: '#64748b' },
+      { name: 'Logistica (Sped/Ritiri)', value: totLog, color: '#ea580c' },
+      { name: 'Personale', value: totPers, color: '#2563eb' },
+      { name: 'Commerciale (Provvigioni)', value: totComm, color: '#059669' },
+    ];
+
+    const totalEbit = data.reduce((acc, curr) => acc + curr.ebit, 0);
+
+    return { 
+      financialData: data, 
+      totals: totalOpex,
+      kpis: { totalEbit, finalFleet: data[4].fleet }
+    };
+  }, [config]);
+
   return (
     <div className="dashboard-container">
       <header className="header">
         <div className="header-title">
           <h1><span className="blue">MOVION</span> <span className="orange">Business Plan</span></h1>
-          <p>Dashboard Finanziaria & Proiezioni a 5 Anni</p>
+          <p>Dashboard Dinamica e Simulatore a 5 Anni</p>
           <div className="badges-row">
-            <span className="badge blue">Dispositivo Medico ELF</span>
-            <span className="badge orange">Noleggio & Vendita</span>
-            <span className="badge green">Break-Even Anno 2</span>
+            <span className="badge blue">Modello Interattivo</span>
+            <span className="badge orange">Noleggio 70% / Vendita 30%</span>
+            <span className="badge green">Dati in Tempo Reale</span>
           </div>
         </div>
         <div className="header-actions">
-          <button onClick={() => alert("Sincronizzazione in arrivo")}>
-            Sincronizza Dati
+          <button className="outline" onClick={() => setShowSettings(!showSettings)}>
+            <Settings size={18} /> Modifica Variabili
           </button>
         </div>
       </header>
 
+      {showSettings && (
+        <div className="settings-panel">
+          <div className="setting-group">
+            <label>Fatturato Obiettivo Anno 5 (€)</label>
+            <input type="number" name="targetRevenueY5" value={config.targetRevenueY5} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Prezzo di Vendita Unitario (€)</label>
+            <input type="number" name="priceSale" value={config.priceSale} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Tariffa Noleggio (Mese) (€)</label>
+            <input type="number" name="priceRental" value={config.priceRental} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Mesi di Rotazione Annua</label>
+            <input type="number" name="rentalYieldMonths" value={config.rentalYieldMonths} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Costo Produzione Unitario (€)</label>
+            <input type="number" name="costProduction" value={config.costProduction} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Costo Logistica x Spedizione (€)</label>
+            <input type="number" name="costLogistics" value={config.costLogistics} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Costo Personale Unitario Annuo (€)</label>
+            <input type="number" name="personnelCost" value={config.personnelCost} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Provvigioni Commerciali (%)</label>
+            <input type="number" name="commercialPercent" value={config.commercialPercent} onChange={handleChange} />
+          </div>
+        </div>
+      )}
+
       <div className="grid-cards">
         <StatCard 
-          title="Fatturato Anno 5" 
-          value={formatCurrency(1500000)} 
+          title="Fatturato Target A5" 
+          value={formatCurrency(config.targetRevenueY5)} 
           icon={DollarSign} 
           trend="up" 
-          trendValue="+300k Annuo" 
+          trendValue="Proiezione a Regime" 
           colorClass="blue"
         />
         <StatCard 
-          title="Utile Operativo (5 Anni)" 
-          value={formatCurrency(1886500)} 
+          title="Utile Operativo Netto (5A)" 
+          value={formatCurrency(kpis.totalEbit)} 
           icon={Activity} 
           trend="up" 
-          trendValue="Cumulato netto" 
+          trendValue="Margine di Profitto Cumulato" 
           colorClass="green"
         />
         <StatCard 
           title="Flotta Noleggio (A5)" 
-          value="350 Unità" 
+          value={`${Math.round(kpis.finalFleet)} Unità`} 
           icon={Package} 
           trend="up"
-          trendValue="Rotazione 10 mesi/anno"
+          trendValue={`Rotazione ${config.rentalYieldMonths} mesi/anno`}
           colorClass="orange"
         />
         <StatCard 
           title="Costo Produzione Unitario" 
-          value="€ 500" 
+          value={`€ ${config.costProduction}`} 
           icon={BarChart3} 
           colorClass="gray"
         />
@@ -138,7 +250,7 @@ function App() {
           <ResponsiveContainer width="100%" height={320}>
             <PieChart>
               <Pie
-                data={opexBreakdown5Years}
+                data={totals}
                 cx="50%"
                 cy="45%"
                 innerRadius={60}
@@ -147,7 +259,7 @@ function App() {
                 dataKey="value"
                 stroke="none"
               >
-                {opexBreakdown5Years.map((entry, index) => (
+                {totals.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
@@ -163,7 +275,7 @@ function App() {
 
       <div className="chart-container" style={{ height: 'auto', marginBottom: '2.5rem' }}>
         <div className="chart-header">
-          <h3><Activity size={20} className="green" /> Dettaglio Conto Economico di Sintesi</h3>
+          <h3><Activity size={20} className="green" /> Dettaglio Conto Economico di Sintesi (Ricalcolo Dinamico)</h3>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="financial-table">
@@ -179,96 +291,52 @@ function App() {
             </thead>
             <tbody>
               <tr>
-                <td style={{ fontWeight: 600 }}>Fatturato (Noleggio + Vendita)</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(300000)}</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(600000)}</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(900000)}</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(1200000)}</td>
-                <td style={{ fontWeight: 600 }}>{formatCurrency(1500000)}</td>
+                <td style={{ fontWeight: 600 }}>Fatturato Dinamico</td>
+                {financialData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{formatCurrency(d.revenue)}</td>)}
               </tr>
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi di Produzione (€500/pz)</td>
-                <td className="negative">{formatCurrency(-44000)}</td>
-                <td className="negative">{formatCurrency(-53000)}</td>
-                <td className="negative">{formatCurrency(-62000)}</td>
-                <td className="negative">{formatCurrency(-71000)}</td>
-                <td className="negative">{formatCurrency(-80000)}</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi di Produzione (€{config.costProduction}/pz)</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.production)}</td>)}
               </tr>
               <tr style={{ backgroundColor: '#f8fafc' }}>
                 <td style={{ fontWeight: 600 }}>Margine Lordo</td>
-                <td className="positive">{formatCurrency(256000)}</td>
-                <td className="positive">{formatCurrency(547000)}</td>
-                <td className="positive">{formatCurrency(838000)}</td>
-                <td className="positive">{formatCurrency(1129000)}</td>
-                <td className="positive">{formatCurrency(1420000)}</td>
+                {financialData.map((d, i) => <td key={i} className="positive">{formatCurrency(d.grossMargin)}</td>)}
               </tr>
               <tr style={{ backgroundColor: '#f8fafc' }}>
                 <td style={{ fontSize: '0.85rem', color: '#64748b' }}>% Margine Lordo</td>
-                <td className="percent">85.3%</td>
-                <td className="percent">91.1%</td>
-                <td className="percent">93.1%</td>
-                <td className="percent">94.0%</td>
-                <td className="percent">94.6%</td>
+                {financialData.map((d, i) => <td key={i} className="percent">{((d.grossMargin / d.revenue)*100).toFixed(1)}%</td>)}
               </tr>
               
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>Personale (da 3 a 6 unità)</td>
-                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-112500)}</td>
-                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-150000)}</td>
-                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-187500)}</td>
-                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-225000)}</td>
-                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-225000)}</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>Personale</td>
+                {financialData.map((d, i) => <td key={i} className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(d.personnel)}</td>)}
               </tr>
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Logistica (€50/movimentazione)</td>
-                <td className="negative">{formatCurrency(-35900)}</td>
-                <td className="negative">{formatCurrency(-71800)}</td>
-                <td className="negative">{formatCurrency(-107700)}</td>
-                <td className="negative">{formatCurrency(-143600)}</td>
-                <td className="negative">{formatCurrency(-179500)}</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Logistica (€{config.costLogistics}/movimentazione)</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.logistics)}</td>)}
               </tr>
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Commerciale e Marketing (15%)</td>
-                <td className="negative">{formatCurrency(-45000)}</td>
-                <td className="negative">{formatCurrency(-90000)}</td>
-                <td className="negative">{formatCurrency(-135000)}</td>
-                <td className="negative">{formatCurrency(-180000)}</td>
-                <td className="negative">{formatCurrency(-225000)}</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Commerciale e Marketing ({config.commercialPercent}%)</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.commercial)}</td>)}
               </tr>
               
               <tr style={{ backgroundColor: '#fff7ed' }}>
                 <td style={{ fontWeight: 600, color: '#c2410c' }}>Subtotale OPEX</td>
-                <td className="negative">{formatCurrency(-193400)}</td>
-                <td className="negative">{formatCurrency(-311800)}</td>
-                <td className="negative">{formatCurrency(-430200)}</td>
-                <td className="negative">{formatCurrency(-548600)}</td>
-                <td className="negative">{formatCurrency(-629500)}</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial)}</td>)}
               </tr>
 
               <tr>
                 <td style={{ paddingLeft: '20px', color: '#64748b' }}>CAPEX (R&D, SW, Certificazione)</td>
-                <td className="negative">{formatCurrency(-190000)}</td>
-                <td className="negative">-</td>
-                <td className="negative">-</td>
-                <td className="negative">-</td>
-                <td className="negative">-</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{d.capex !== 0 ? formatCurrency(d.capex) : '-'}</td>)}
               </tr>
               
               <tr style={{ borderTop: '2px solid #e2e8f0' }}>
                 <td style={{ fontSize: '1.1rem', fontWeight: 700 }}>EBIT (Risultato Operativo)</td>
-                <td className="negative" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(-127400)}</td>
-                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(235200)}</td>
-                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(407800)}</td>
-                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(580400)}</td>
-                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(790500)}</td>
+                {financialData.map((d, i) => <td key={i} className={d.ebit < 0 ? "negative" : "positive"} style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(d.ebit)}</td>)}
               </tr>
               <tr>
                 <td style={{ fontSize: '0.85rem', color: '#64748b' }}>% EBIT Margin</td>
-                <td className="danger" style={{ fontWeight: 600, fontSize: '0.9rem', color: '#dc2626' }}>-42.4%</td>
-                <td className="percent">39.2%</td>
-                <td className="percent">45.3%</td>
-                <td className="percent">48.3%</td>
-                <td className="percent">52.7%</td>
+                {financialData.map((d, i) => <td key={i} className={d.ebit < 0 ? "danger" : "percent"} style={{ fontWeight: 600, fontSize: '0.9rem' }}>{((d.ebit / d.revenue)*100).toFixed(1)}%</td>)}
               </tr>
             </tbody>
           </table>
