@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
+  BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { TrendingUp, Activity, DollarSign, Package, Users, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
+import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 import './App.css';
 
 // Dati finanziari aggiornati
@@ -14,19 +14,11 @@ const financialData = [
   { year: 'Anno 5', revenue: 1500000, production: -80000, logistics: -179500, personnel: -225000, commercial: -225000, ebit: 790500 },
 ];
 
-const unitData = [
-  { year: 'Anno 1', sales: 18, rental: 70 },
-  { year: 'Anno 2', sales: 36, rental: 70 },
-  { year: 'Anno 3', sales: 54, rental: 70 },
-  { year: 'Anno 4', sales: 72, rental: 70 },
-  { year: 'Anno 5', sales: 90, rental: 70 },
-];
-
 const opexBreakdown5Years = [
-  { name: 'Produzione & Accessori', value: 310000, color: '#94a3b8' }, // Grigio
-  { name: 'Logistica (Spedizioni/Ritiri)', value: 538500, color: '#f97316' }, // Arancione
-  { name: 'Personale (Fino a 6 u.)', value: 900000, color: '#3b82f6' }, // Blu
-  { name: 'Commerciale e Marketing', value: 675000, color: '#10b981' }, // Verde
+  { name: 'Produzione & Accessori', value: 310000, color: '#64748b' }, // Grigio
+  { name: 'Logistica (Spedizioni/Ritiri)', value: 538500, color: '#ea580c' }, // Arancione
+  { name: 'Personale (Fino a 6 u.)', value: 900000, color: '#2563eb' }, // Blu
+  { name: 'Commerciale e Marketing', value: 675000, color: '#059669' }, // Verde
 ];
 
 function formatCurrency(value) {
@@ -34,9 +26,15 @@ function formatCurrency(value) {
 }
 
 function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "blue" }) {
-  let iconColor = "#3b82f6";
-  if (colorClass === "orange") iconColor = "#f97316";
-  if (colorClass === "green") iconColor = "#10b981";
+  let iconColor = "#2563eb";
+  if (colorClass === "orange") iconColor = "#ea580c";
+  if (colorClass === "green") iconColor = "#059669";
+  if (colorClass === "gray") iconColor = "#64748b";
+
+  let bgRGB = '37,99,235';
+  if (colorClass === "orange") bgRGB = '234,88,12';
+  if (colorClass === "green") bgRGB = '5,150,105';
+  if (colorClass === "gray") bgRGB = '100,116,139';
 
   return (
     <div className={`stat-card ${colorClass}`}>
@@ -45,7 +43,7 @@ function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "b
           <div className="stat-card-title">{title}</div>
           <div className="stat-card-value">{value}</div>
         </div>
-        <div style={{ padding: '10px', background: `rgba(${colorClass==='orange'?'249,115,22':colorClass==='green'?'16,185,129':'59,130,246'}, 0.1)`, borderRadius: '12px' }}>
+        <div style={{ padding: '10px', background: `rgba(${bgRGB}, 0.1)`, borderRadius: '12px' }}>
           <Icon size={24} color={iconColor} />
         </div>
       </div>
@@ -119,16 +117,16 @@ function App() {
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <BarChart data={financialData} margin={{ top: 20, right: 10, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-              <XAxis dataKey="year" stroke="#9ca3af" />
-              <YAxis stroke="#9ca3af" tickFormatter={(val) => `€${val/1000}k`} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+              <XAxis dataKey="year" stroke="#64748b" />
+              <YAxis stroke="#64748b" tickFormatter={(val) => `€${val/1000}k`} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: '#1e2329', borderColor: '#374151', color: '#f8fafc' }}
+                contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a' }}
                 formatter={(value) => formatCurrency(value)}
               />
               <Legend />
-              <Bar dataKey="revenue" name="Ricavi Totali" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="ebit" name="EBIT (Utile Operativo)" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="revenue" name="Ricavi Totali" fill="#2563eb" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="ebit" name="EBIT (Utile Operativo)" fill="#059669" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -147,6 +145,7 @@ function App() {
                 outerRadius={100}
                 paddingAngle={5}
                 dataKey="value"
+                stroke="none"
               >
                 {opexBreakdown5Years.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
@@ -154,7 +153,7 @@ function App() {
               </Pie>
               <RechartsTooltip 
                 formatter={(value) => formatCurrency(value)}
-                contentStyle={{ backgroundColor: '#1e2329', borderColor: '#374151' }}
+                contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', color: '#0f172a' }}
               />
               <Legend verticalAlign="bottom" height={36} />
             </PieChart>
@@ -180,68 +179,96 @@ function App() {
             </thead>
             <tbody>
               <tr>
-                <td>Fatturato (Noleggio + Vendita)</td>
-                <td>{formatCurrency(300000)}</td>
-                <td>{formatCurrency(600000)}</td>
-                <td>{formatCurrency(900000)}</td>
-                <td>{formatCurrency(1200000)}</td>
-                <td>{formatCurrency(1500000)}</td>
+                <td style={{ fontWeight: 600 }}>Fatturato (Noleggio + Vendita)</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(300000)}</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(600000)}</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(900000)}</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(1200000)}</td>
+                <td style={{ fontWeight: 600 }}>{formatCurrency(1500000)}</td>
               </tr>
-              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Costi di Produzione (€500/pz)</td>
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi di Produzione (€500/pz)</td>
                 <td className="negative">{formatCurrency(-44000)}</td>
                 <td className="negative">{formatCurrency(-53000)}</td>
                 <td className="negative">{formatCurrency(-62000)}</td>
                 <td className="negative">{formatCurrency(-71000)}</td>
                 <td className="negative">{formatCurrency(-80000)}</td>
               </tr>
-              <tr>
-                <td>Margine Lordo</td>
+              <tr style={{ backgroundColor: '#f8fafc' }}>
+                <td style={{ fontWeight: 600 }}>Margine Lordo</td>
                 <td className="positive">{formatCurrency(256000)}</td>
                 <td className="positive">{formatCurrency(547000)}</td>
                 <td className="positive">{formatCurrency(838000)}</td>
                 <td className="positive">{formatCurrency(1129000)}</td>
                 <td className="positive">{formatCurrency(1420000)}</td>
               </tr>
-              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Personale (da 3 a 6 unità)</td>
-                <td className="negative">{formatCurrency(-112500)}</td>
-                <td className="negative">{formatCurrency(-150000)}</td>
-                <td className="negative">{formatCurrency(-187500)}</td>
-                <td className="negative">{formatCurrency(-225000)}</td>
-                <td className="negative">{formatCurrency(-225000)}</td>
+              <tr style={{ backgroundColor: '#f8fafc' }}>
+                <td style={{ fontSize: '0.85rem', color: '#64748b' }}>% Margine Lordo</td>
+                <td className="percent">85.3%</td>
+                <td className="percent">91.1%</td>
+                <td className="percent">93.1%</td>
+                <td className="percent">94.0%</td>
+                <td className="percent">94.6%</td>
               </tr>
-              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Logistica (€50/movimentazione)</td>
+              
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>Personale (da 3 a 6 unità)</td>
+                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-112500)}</td>
+                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-150000)}</td>
+                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-187500)}</td>
+                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-225000)}</td>
+                <td className="negative" style={{ borderTop: '1px solid #e2e8f0', paddingTop: '15px' }}>{formatCurrency(-225000)}</td>
+              </tr>
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Logistica (€50/movimentazione)</td>
                 <td className="negative">{formatCurrency(-35900)}</td>
                 <td className="negative">{formatCurrency(-71800)}</td>
                 <td className="negative">{formatCurrency(-107700)}</td>
                 <td className="negative">{formatCurrency(-143600)}</td>
                 <td className="negative">{formatCurrency(-179500)}</td>
               </tr>
-              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Commerciale e Marketing (15%)</td>
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Commerciale e Marketing (15%)</td>
                 <td className="negative">{formatCurrency(-45000)}</td>
                 <td className="negative">{formatCurrency(-90000)}</td>
                 <td className="negative">{formatCurrency(-135000)}</td>
                 <td className="negative">{formatCurrency(-180000)}</td>
                 <td className="negative">{formatCurrency(-225000)}</td>
               </tr>
-              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
-                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>CAPEX (R&D, SW, Certificazione)</td>
+              
+              <tr style={{ backgroundColor: '#fff7ed' }}>
+                <td style={{ fontWeight: 600, color: '#c2410c' }}>Subtotale OPEX</td>
+                <td className="negative">{formatCurrency(-193400)}</td>
+                <td className="negative">{formatCurrency(-311800)}</td>
+                <td className="negative">{formatCurrency(-430200)}</td>
+                <td className="negative">{formatCurrency(-548600)}</td>
+                <td className="negative">{formatCurrency(-629500)}</td>
+              </tr>
+
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>CAPEX (R&D, SW, Certificazione)</td>
                 <td className="negative">{formatCurrency(-190000)}</td>
                 <td className="negative">-</td>
                 <td className="negative">-</td>
                 <td className="negative">-</td>
                 <td className="negative">-</td>
               </tr>
-              <tr style={{ borderTop: '2px solid rgba(255,255,255,0.1)' }}>
-                <td style={{ fontSize: '1.1rem' }}>EBIT (Risultato Operativo)</td>
-                <td className="negative" style={{ fontSize: '1.1rem' }}>{formatCurrency(-127400)}</td>
-                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(235200)}</td>
-                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(407800)}</td>
-                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(580400)}</td>
-                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(790500)}</td>
+              
+              <tr style={{ borderTop: '2px solid #e2e8f0' }}>
+                <td style={{ fontSize: '1.1rem', fontWeight: 700 }}>EBIT (Risultato Operativo)</td>
+                <td className="negative" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(-127400)}</td>
+                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(235200)}</td>
+                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(407800)}</td>
+                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(580400)}</td>
+                <td className="positive" style={{ fontSize: '1.1rem', fontWeight: 700 }}>{formatCurrency(790500)}</td>
+              </tr>
+              <tr>
+                <td style={{ fontSize: '0.85rem', color: '#64748b' }}>% EBIT Margin</td>
+                <td className="danger" style={{ fontWeight: 600, fontSize: '0.9rem', color: '#dc2626' }}>-42.4%</td>
+                <td className="percent">39.2%</td>
+                <td className="percent">45.3%</td>
+                <td className="percent">48.3%</td>
+                <td className="percent">52.7%</td>
               </tr>
             </tbody>
           </table>
