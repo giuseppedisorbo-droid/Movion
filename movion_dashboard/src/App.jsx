@@ -64,7 +64,8 @@ function App() {
     const saved = localStorage.getItem('movionConfig');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        return { ...defaultConfig, ...parsed };
       } catch(e) {}
     }
     return defaultConfig;
@@ -174,7 +175,7 @@ function App() {
 
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
 
-    const targetRevenueY5 = fData[4].revenue;
+    const targetRevenueY5 = fData[4].revenue || 1;
     const saleRatioY5 = (uData[4].revSale / targetRevenueY5) * 100;
 
     return { 
