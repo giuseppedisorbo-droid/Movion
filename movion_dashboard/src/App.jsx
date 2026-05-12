@@ -44,8 +44,8 @@ function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "b
 
 function App() {
   const defaultConfig = {
-    targetSalesUnitsY5: 90,
-    targetFleetY5: 350,
+    salesY1: 18, salesY2: 36, salesY3: 54, salesY4: 72, salesY5: 90,
+    fleetY1: 70, fleetY2: 140, fleetY3: 210, fleetY4: 280, fleetY5: 350,
     priceSale: 5000,
     priceRental: 300,
     rentalYieldMonths: 10,
@@ -94,8 +94,9 @@ function App() {
   };
 
   const { financialData, unitData, totals, kpis } = useMemo(() => {
-    const salesY5 = Number(config.targetSalesUnitsY5) || 0;
-    const fleetY5 = Number(config.targetFleetY5) || 0;
+    const salesArr = [Number(config.salesY1)||0, Number(config.salesY2)||0, Number(config.salesY3)||0, Number(config.salesY4)||0, Number(config.salesY5)||0];
+    const fleetArr = [Number(config.fleetY1)||0, Number(config.fleetY2)||0, Number(config.fleetY3)||0, Number(config.fleetY4)||0, Number(config.fleetY5)||0];
+    
     const pSale = Number(config.priceSale) || 1;
     const pRental = Number(config.priceRental) || 1;
     const rYield = Number(config.rentalYieldMonths) || 1;
@@ -110,9 +111,6 @@ function App() {
     
     const cCapex = (Number(config.capexElectronics)||0) + (Number(config.capexIT)||0) + (Number(config.capexMarketing)||0);
 
-    const stepSales = salesY5 / 5;
-    const stepFleet = fleetY5 / 5;
-    
     let fData = [];
     let uData = [];
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totIns = 0;
@@ -121,15 +119,15 @@ function App() {
     let totalUnitsProducedOverall = 0;
 
     for (let i = 0; i < 5; i++) {
-      let salesUnits = stepSales * (i + 1);
-      let rentalFleet = stepFleet * (i + 1);
+      let salesUnits = salesArr[i];
+      let rentalFleet = fleetArr[i];
+      
+      let newRentalUnits = i === 0 ? rentalFleet : Math.max(0, rentalFleet - fleetArr[i-1]);
       
       let revSale = salesUnits * pSale;
       let revRental = rentalFleet * rYield * pRental;
       let revenue = revSale + revRental;
       
-      let prevFleet = i === 0 ? 0 : stepFleet * i;
-      let newRentalUnits = rentalFleet - prevFleet;
       let unitsProduced = salesUnits + newRentalUnits;
       
       let costProd = unitsProduced * cProd;
@@ -246,15 +244,25 @@ function App() {
           <div className="settings-grid">
             
             {/* GRUPPO 1 */}
-            <div className="setting-card group-green">
-              <h3><TrendingUp size={18}/> Obiettivi Commerciali</h3>
-              <div className="setting-group">
-                <label>Unità Vendute (Obiettivo A5)</label>
-                <input type="number" name="targetSalesUnitsY5" value={config.targetSalesUnitsY5} onChange={handleChange} />
-              </div>
-              <div className="setting-group">
-                <label>Flotta Noleggio (Obiettivo A5)</label>
-                <input type="number" name="targetFleetY5" value={config.targetFleetY5} onChange={handleChange} />
+            <div className="setting-card group-green" style={{ gridColumn: '1 / -1' }}>
+              <h3><TrendingUp size={18}/> Volumi Commerciali (Personalizza per Anno)</h3>
+              <div className="volumes-grid">
+                <div className="volumes-row">
+                  <strong>Unità Vendute</strong>
+                  <input type="number" name="salesY1" value={config.salesY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/>
+                  <input type="number" name="salesY2" value={config.salesY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/>
+                  <input type="number" name="salesY3" value={config.salesY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/>
+                  <input type="number" name="salesY4" value={config.salesY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/>
+                  <input type="number" name="salesY5" value={config.salesY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/>
+                </div>
+                <div className="volumes-row">
+                  <strong>Flotta Noleggio (Totali)</strong>
+                  <input type="number" name="fleetY1" value={config.fleetY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/>
+                  <input type="number" name="fleetY2" value={config.fleetY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/>
+                  <input type="number" name="fleetY3" value={config.fleetY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/>
+                  <input type="number" name="fleetY4" value={config.fleetY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/>
+                  <input type="number" name="fleetY5" value={config.fleetY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/>
+                </div>
               </div>
             </div>
 
