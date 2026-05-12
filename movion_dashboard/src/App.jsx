@@ -537,7 +537,7 @@ function App() {
                 {financialData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{formatCurrency(d.revenue)}</td>)}
               </tr>
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi Produzione (€{config.costProduction}/pz)</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi Produzione</td>
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.production)}</td>)}
               </tr>
               <tr style={{ backgroundColor: '#f8fafc' }}>
@@ -566,13 +566,17 @@ function App() {
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.maintenance)}</td>)}
               </tr>
               <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi Struttura ({config.structurePercent}%)</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.structure)}</td>)}
+              </tr>
+              <tr>
                 <td style={{ paddingLeft: '20px', color: '#64748b' }}>Assicurazione e Cert. Annue</td>
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.insurance)}</td>)}
               </tr>
               
               <tr style={{ backgroundColor: '#fff7ed' }}>
                 <td style={{ fontWeight: 600, color: '#c2410c' }}>Subtotale OPEX</td>
-                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial + d.maintenance + d.insurance)}</td>)}
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial + d.maintenance + d.structure + d.insurance)}</td>)}
               </tr>
 
               <tr>
