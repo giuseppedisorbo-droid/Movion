@@ -246,23 +246,37 @@ function App() {
             {/* GRUPPO 1 */}
             <div className="setting-card group-green" style={{ gridColumn: '1 / -1' }}>
               <h3><TrendingUp size={18}/> Volumi Commerciali (Personalizza per Anno)</h3>
-              <div className="volumes-grid">
-                <div className="volumes-row">
-                  <strong>Unità Vendute</strong>
-                  <input type="number" name="salesY1" value={config.salesY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/>
-                  <input type="number" name="salesY2" value={config.salesY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/>
-                  <input type="number" name="salesY3" value={config.salesY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/>
-                  <input type="number" name="salesY4" value={config.salesY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/>
-                  <input type="number" name="salesY5" value={config.salesY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/>
-                </div>
-                <div className="volumes-row">
-                  <strong>Flotta Noleggio (Totali)</strong>
-                  <input type="number" name="fleetY1" value={config.fleetY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/>
-                  <input type="number" name="fleetY2" value={config.fleetY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/>
-                  <input type="number" name="fleetY3" value={config.fleetY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/>
-                  <input type="number" name="fleetY4" value={config.fleetY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/>
-                  <input type="number" name="fleetY5" value={config.fleetY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/>
-                </div>
+              <div className="volumes-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Anno 1</th>
+                      <th>Anno 2</th>
+                      <th>Anno 3</th>
+                      <th>Anno 4</th>
+                      <th>Anno 5</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Unità Vendute</td>
+                      <td><input type="number" name="salesY1" value={config.salesY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/></td>
+                      <td><input type="number" name="salesY2" value={config.salesY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/></td>
+                      <td><input type="number" name="salesY3" value={config.salesY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/></td>
+                      <td><input type="number" name="salesY4" value={config.salesY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/></td>
+                      <td><input type="number" name="salesY5" value={config.salesY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
+                    </tr>
+                    <tr>
+                      <td>Flotta Noleggio</td>
+                      <td><input type="number" name="fleetY1" value={config.fleetY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/></td>
+                      <td><input type="number" name="fleetY2" value={config.fleetY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/></td>
+                      <td><input type="number" name="fleetY3" value={config.fleetY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/></td>
+                      <td><input type="number" name="fleetY4" value={config.fleetY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/></td>
+                      <td><input type="number" name="fleetY5" value={config.fleetY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
