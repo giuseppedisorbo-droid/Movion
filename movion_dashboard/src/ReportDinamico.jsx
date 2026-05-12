@@ -14,7 +14,7 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
       <h3>1. Executive Summary</h3>
       <p>
         Il presente Business Plan descrive il progetto di sviluppo, certificazione, produzione e commercializzazione di <strong>MOVION</strong>, un dispositivo elettromedicale proprietario basato su campi elettromagnetici a bassissima frequenza (ELF) e microcorrenti. 
-        Il progetto mira a raggiungere un fatturato di <strong>{formatCurrency(config.targetRevenueY5)}</strong> entro il 5° anno, con un modello di ricavi basato in prevalenza sui noleggi e sulle vendite dirette.
+        Il progetto mira a raggiungere un fatturato di <strong>{formatCurrency(kpis.targetRevenueY5)}</strong> entro il 5° anno, con un modello di ricavi basato su noleggi e vendite dirette in crescita lineare.
       </p>
 
       <hr />
@@ -202,7 +202,7 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
       <h3>7. Riepilogo KPI Target</h3>
       <table className="doc-table">
         <tbody>
-          <tr><td>Fatturato Target Anno 5</td><td>{formatCurrency(config.targetRevenueY5)}</td></tr>
+          <tr><td>Fatturato Target Anno 5</td><td>{formatCurrency(kpis.targetRevenueY5)}</td></tr>
           <tr><td><strong>Costo Spedizione/Ritiro</strong></td><td><strong>{formatCurrency(config.costLogistics)} fissi</strong></td></tr>
           <tr><td>Investimento Iniziale CAPEX</td><td>{formatCurrency(config.capex)}</td></tr>
           <tr><td>Costo Personale Annuo Unitario</td><td>{formatCurrency(config.personnelCost)}/anno</td></tr>

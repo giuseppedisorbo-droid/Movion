@@ -44,7 +44,8 @@ function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "b
 
 function App() {
   const defaultConfig = {
-    targetRevenueY5: 1500000,
+    targetSalesUnitsY5: 90,
+    targetFleetY5: 350,
     priceSale: 5000,
     priceRental: 300,
     rentalYieldMonths: 10,
@@ -84,7 +85,8 @@ function App() {
   };
 
   const { financialData, unitData, totals, kpis } = useMemo(() => {
-    const targetRev = Number(config.targetRevenueY5) || 0;
+    const salesY5 = Number(config.targetSalesUnitsY5) || 0;
+    const fleetY5 = Number(config.targetFleetY5) || 0;
     const pSale = Number(config.priceSale) || 1;
     const pRental = Number(config.priceRental) || 1;
     const rYield = Number(config.rentalYieldMonths) || 1;
@@ -94,7 +96,9 @@ function App() {
     const cComm = Number(config.commercialPercent) || 0;
     const cCapex = Number(config.capex) || 0;
 
-    const step = targetRev / 5;
+    const stepSales = salesY5 / 5;
+    const stepFleet = fleetY5 / 5;
+    
     let fData = [];
     let uData = [];
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0;
@@ -103,16 +107,14 @@ function App() {
     let totalUnitsProducedOverall = 0;
 
     for (let i = 0; i < 5; i++) {
-      let revenue = step * (i + 1);
+      let salesUnits = stepSales * (i + 1);
+      let rentalFleet = stepFleet * (i + 1);
       
-      let revRental = revenue * 0.70;
-      let revSale = revenue * 0.30;
+      let revSale = salesUnits * pSale;
+      let revRental = rentalFleet * rYield * pRental;
+      let revenue = revSale + revRental;
       
-      let salesUnits = revSale / pSale;
-      let rentalYieldPerDevice = rYield * pRental;
-      let rentalFleet = revRental / rentalYieldPerDevice; 
-      
-      let prevFleet = i === 0 ? 0 : ((step * i) * 0.70) / rentalYieldPerDevice;
+      let prevFleet = i === 0 ? 0 : stepFleet * i;
       let newRentalUnits = rentalFleet - prevFleet;
       let unitsProduced = salesUnits + newRentalUnits;
       
@@ -166,11 +168,14 @@ function App() {
 
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
 
+    const targetRevenueY5 = fData[4].revenue;
+    const saleRatioY5 = ((fData[4].revenue - fData[4].revenue + unitData[4].revSale) / targetRevenueY5) * 100;
+
     return { 
       financialData: fData, 
       unitData: uData,
       totals: totalOpex,
-      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall }
+      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall, targetRevenueY5, saleRatioY5 }
     };
   }, [config]);
 
@@ -218,8 +223,12 @@ function App() {
       {showSettings && (
         <div className="settings-panel">
           <div className="setting-group">
-            <label>Fatturato Obiettivo Anno 5 (€)</label>
-            <input type="number" name="targetRevenueY5" value={config.targetRevenueY5} onChange={handleChange} />
+            <label>Unità Vendute (Obiettivo A5)</label>
+            <input type="number" name="targetSalesUnitsY5" value={config.targetSalesUnitsY5} onChange={handleChange} />
+          </div>
+          <div className="setting-group">
+            <label>Flotta Noleggio (Obiettivo A5)</label>
+            <input type="number" name="targetFleetY5" value={config.targetFleetY5} onChange={handleChange} />
           </div>
           <div className="setting-group">
             <label>Prezzo Vendita Unitario (€)</label>
@@ -255,7 +264,7 @@ function App() {
       <div className="grid-cards">
         <StatCard 
           title="Fatturato Target A5" 
-          value={formatCurrency(config.targetRevenueY5)} 
+          value={formatCurrency(kpis.targetRevenueY5)} 
           icon={DollarSign} 
           trend="up" 
           trendValue="Proiezione a Regime" 
@@ -429,7 +438,7 @@ function App() {
             </thead>
             <tbody>
               <tr>
-                <td style={{ color: '#64748b' }}>Ricavi Vendita (30%)</td>
+                <td style={{ color: '#64748b' }}>Ricavi Vendita</td>
                 {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revSale)}</td>)}
               </tr>
               <tr>
@@ -455,7 +464,7 @@ function App() {
             </thead>
             <tbody>
               <tr>
-                <td style={{ color: '#64748b' }}>Ricavi Noleggio (70%)</td>
+                <td style={{ color: '#64748b' }}>Ricavi Noleggio</td>
                 {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revRental)}</td>)}
               </tr>
               <tr>
