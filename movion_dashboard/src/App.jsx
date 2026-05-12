@@ -175,7 +175,7 @@ function App() {
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
 
     const targetRevenueY5 = fData[4].revenue;
-    const saleRatioY5 = ((fData[4].revenue - fData[4].revenue + unitData[4].revSale) / targetRevenueY5) * 100;
+    const saleRatioY5 = (uData[4].revSale / targetRevenueY5) * 100;
 
     return { 
       financialData: fData, 
