@@ -46,6 +46,7 @@ function App() {
   const defaultConfig = {
     salesY1: 18, salesY2: 36, salesY3: 54, salesY4: 72, salesY5: 90,
     fleetY1: 70, fleetY2: 140, fleetY3: 210, fleetY4: 280, fleetY5: 350,
+    revDynY1: 300000, revDynY2: 600000, revDynY3: 900000, revDynY4: 1200000, revDynY5: 1500000,
     priceSale: 5000,
     priceRental: 300,
     rentalYieldMonths: 10,
@@ -96,6 +97,7 @@ function App() {
   const { financialData, unitData, totals, kpis } = useMemo(() => {
     const salesArr = [Number(config.salesY1)||0, Number(config.salesY2)||0, Number(config.salesY3)||0, Number(config.salesY4)||0, Number(config.salesY5)||0];
     const fleetArr = [Number(config.fleetY1)||0, Number(config.fleetY2)||0, Number(config.fleetY3)||0, Number(config.fleetY4)||0, Number(config.fleetY5)||0];
+    const dynArr = [Number(config.revDynY1)||0, Number(config.revDynY2)||0, Number(config.revDynY3)||0, Number(config.revDynY4)||0, Number(config.revDynY5)||0];
     
     const pSale = Number(config.priceSale) || 1;
     const pRental = Number(config.priceRental) || 1;
@@ -126,7 +128,8 @@ function App() {
       
       let revSale = salesUnits * pSale;
       let revRental = rentalFleet * rYield * pRental;
-      let revenue = revSale + revRental;
+      let revDynamic = dynArr[i];
+      let revenue = revSale + revRental + revDynamic;
       
       let unitsProduced = salesUnits + newRentalUnits;
       
@@ -274,6 +277,14 @@ function App() {
                       <td><input type="number" name="fleetY3" value={config.fleetY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/></td>
                       <td><input type="number" name="fleetY4" value={config.fleetY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/></td>
                       <td><input type="number" name="fleetY5" value={config.fleetY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
+                    </tr>
+                    <tr>
+                      <td>Fatturato Dinamico (€)</td>
+                      <td><input type="number" name="revDynY1" value={config.revDynY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/></td>
+                      <td><input type="number" name="revDynY2" value={config.revDynY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/></td>
+                      <td><input type="number" name="revDynY3" value={config.revDynY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/></td>
+                      <td><input type="number" name="revDynY4" value={config.revDynY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/></td>
+                      <td><input type="number" name="revDynY5" value={config.revDynY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
                     </tr>
                   </tbody>
                 </table>
