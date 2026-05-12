@@ -1,41 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
+  LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { TrendingUp, Activity, DollarSign, Package, Users, Truck } from 'lucide-react';
+import { TrendingUp, Activity, DollarSign, Package, Users, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 import './App.css';
 
-// Dati finanziari (Mock Firebase)
+// Dati finanziari aggiornati
 const financialData = [
-  { year: 'Anno 1', revenue: 300000, production: -44000, opex: -393400, ebit: -127400 },
-  { year: 'Anno 2', revenue: 600000, production: -53000, opex: -311800, ebit: 235200 },
-  { year: 'Anno 3', revenue: 900000, production: -62000, opex: -430200, ebit: 407800 },
-  { year: 'Anno 4', revenue: 1200000, production: -71000, opex: -548600, ebit: 580400 },
-  { year: 'Anno 5', revenue: 1500000, production: -80000, opex: -629500, ebit: 790500 },
+  { year: 'Anno 1', revenue: 300000, production: -44000, logistics: -35900, personnel: -112500, commercial: -45000, ebit: -127400 },
+  { year: 'Anno 2', revenue: 600000, production: -53000, logistics: -71800, personnel: -150000, commercial: -90000, ebit: 235200 },
+  { year: 'Anno 3', revenue: 900000, production: -62000, logistics: -107700, personnel: -187500, commercial: -135000, ebit: 407800 },
+  { year: 'Anno 4', revenue: 1200000, production: -71000, logistics: -143600, personnel: -225000, commercial: -180000, ebit: 580400 },
+  { year: 'Anno 5', revenue: 1500000, production: -80000, logistics: -179500, personnel: -225000, commercial: -225000, ebit: 790500 },
 ];
 
 const unitData = [
-  { year: 'Anno 1', sales: 18, rental: 70, total: 88 },
-  { year: 'Anno 2', sales: 36, rental: 70, total: 106 },
-  { year: 'Anno 3', sales: 54, rental: 70, total: 124 },
-  { year: 'Anno 4', sales: 72, rental: 70, total: 142 },
-  { year: 'Anno 5', sales: 90, rental: 70, total: 160 },
+  { year: 'Anno 1', sales: 18, rental: 70 },
+  { year: 'Anno 2', sales: 36, rental: 70 },
+  { year: 'Anno 3', sales: 54, rental: 70 },
+  { year: 'Anno 4', sales: 72, rental: 70 },
+  { year: 'Anno 5', sales: 90, rental: 70 },
+];
+
+const opexBreakdown5Years = [
+  { name: 'Produzione & Accessori', value: 310000, color: '#94a3b8' }, // Grigio
+  { name: 'Logistica (Spedizioni/Ritiri)', value: 538500, color: '#f97316' }, // Arancione
+  { name: 'Personale (Fino a 6 u.)', value: 900000, color: '#3b82f6' }, // Blu
+  { name: 'Commerciale e Marketing', value: 675000, color: '#10b981' }, // Verde
 ];
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
 }
 
-function StatCard({ title, value, icon: Icon, trend, trendValue }) {
+function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "blue" }) {
+  let iconColor = "#3b82f6";
+  if (colorClass === "orange") iconColor = "#f97316";
+  if (colorClass === "green") iconColor = "#10b981";
+
   return (
-    <div className="stat-card">
+    <div className={`stat-card ${colorClass}`}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
           <div className="stat-card-title">{title}</div>
           <div className="stat-card-value">{value}</div>
         </div>
-        <div style={{ padding: '10px', background: 'rgba(59, 130, 246, 0.1)', borderRadius: '12px' }}>
-          <Icon size={24} color="#3b82f6" />
+        <div style={{ padding: '10px', background: `rgba(${colorClass==='orange'?'249,115,22':colorClass==='green'?'16,185,129':'59,130,246'}, 0.1)`, borderRadius: '12px' }}>
+          <Icon size={24} color={iconColor} />
         </div>
       </div>
       {trend && (
@@ -49,25 +60,20 @@ function StatCard({ title, value, icon: Icon, trend, trendValue }) {
 }
 
 function App() {
-  const [data, setData] = useState(financialData);
-
-  // Qui integreremo la connessione reale a Firebase
-  useEffect(() => {
-    // const unsubscribe = onSnapshot(doc(db, "business_plan", "movion"), (doc) => {
-    //   setData(doc.data().financials);
-    // });
-    // return () => unsubscribe();
-  }, []);
-
   return (
     <div className="dashboard-container">
       <header className="header">
         <div className="header-title">
-          <h1>MOVION Business Plan</h1>
+          <h1><span className="blue">MOVION</span> <span className="orange">Business Plan</span></h1>
           <p>Dashboard Finanziaria & Proiezioni a 5 Anni</p>
+          <div className="badges-row">
+            <span className="badge blue">Dispositivo Medico ELF</span>
+            <span className="badge orange">Noleggio & Vendita</span>
+            <span className="badge green">Break-Even Anno 2</span>
+          </div>
         </div>
         <div className="header-actions">
-          <button onClick={() => alert("Funzione Connetti a Firebase in arrivo!")}>
+          <button onClick={() => alert("Sincronizzazione in arrivo")}>
             Sincronizza Dati
           </button>
         </div>
@@ -79,41 +85,45 @@ function App() {
           value={formatCurrency(1500000)} 
           icon={DollarSign} 
           trend="up" 
-          trendValue="+25% CAGR" 
+          trendValue="+300k Annuo" 
+          colorClass="blue"
         />
         <StatCard 
-          title="Margine Lordo Medio" 
-          value="93.1%" 
+          title="Utile Operativo (5 Anni)" 
+          value={formatCurrency(1886500)} 
           icon={Activity} 
           trend="up" 
-          trendValue="Altissima redditività" 
+          trendValue="Cumulato netto" 
+          colorClass="green"
         />
         <StatCard 
           title="Flotta Noleggio (A5)" 
           value="350 Unità" 
           icon={Package} 
+          trend="up"
+          trendValue="Rotazione 10 mesi/anno"
+          colorClass="orange"
         />
         <StatCard 
-          title="Break-Even Point" 
-          value="Q3 - Anno 2" 
-          icon={TrendingUp} 
-          trend="up" 
-          trendValue="Luglio Anno 2" 
+          title="Costo Produzione Unitario" 
+          value="€ 500" 
+          icon={BarChart3} 
+          colorClass="gray"
         />
       </div>
 
       <div className="charts-section">
         <div className="chart-container">
           <div className="chart-header">
-            <h3>Crescita Ricavi vs EBIT (5 Anni)</h3>
+            <h3><BarChart3 size={20} className="blue" /> Crescita Ricavi vs EBIT (5 Anni)</h3>
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" vertical={false} />
-              <XAxis dataKey="year" stroke="#a0a0ab" />
-              <YAxis stroke="#a0a0ab" tickFormatter={(val) => `€${val/1000}k`} />
+            <BarChart data={financialData} margin={{ top: 20, right: 10, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+              <XAxis dataKey="year" stroke="#9ca3af" />
+              <YAxis stroke="#9ca3af" tickFormatter={(val) => `€${val/1000}k`} />
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: '#121217', borderColor: '#2a2a35', color: '#fff' }}
+                contentStyle={{ backgroundColor: '#1e2329', borderColor: '#374151', color: '#f8fafc' }}
                 formatter={(value) => formatCurrency(value)}
               />
               <Legend />
@@ -125,33 +135,42 @@ function App() {
 
         <div className="chart-container">
           <div className="chart-header">
-            <h3>Produzione Unità (Sales vs Rental)</h3>
+            <h3><PieChartIcon size={20} className="orange" /> Ripartizione Costi (Totale 5A)</h3>
           </div>
           <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={unitData} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a2a35" />
-              <XAxis dataKey="year" stroke="#a0a0ab" />
-              <YAxis stroke="#a0a0ab" />
+            <PieChart>
+              <Pie
+                data={opexBreakdown5Years}
+                cx="50%"
+                cy="45%"
+                innerRadius={60}
+                outerRadius={100}
+                paddingAngle={5}
+                dataKey="value"
+              >
+                {opexBreakdown5Years.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
               <RechartsTooltip 
-                contentStyle={{ backgroundColor: '#121217', borderColor: '#2a2a35', color: '#fff' }}
+                formatter={(value) => formatCurrency(value)}
+                contentStyle={{ backgroundColor: '#1e2329', borderColor: '#374151' }}
               />
-              <Legend />
-              <Line type="monotone" dataKey="sales" name="Vendite" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} />
-              <Line type="monotone" dataKey="rental" name="Nuovi Noleggi" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} />
-            </LineChart>
+              <Legend verticalAlign="bottom" height={36} />
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="chart-container" style={{ height: 'auto' }}>
+      <div className="chart-container" style={{ height: 'auto', marginBottom: '2.5rem' }}>
         <div className="chart-header">
-          <h3>Conto Economico di Sintesi</h3>
+          <h3><Activity size={20} className="green" /> Dettaglio Conto Economico di Sintesi</h3>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="financial-table">
             <thead>
               <tr>
-                <th>Voce</th>
+                <th>Voce Descrittiva</th>
                 <th>Anno 1</th>
                 <th>Anno 2</th>
                 <th>Anno 3</th>
@@ -161,15 +180,15 @@ function App() {
             </thead>
             <tbody>
               <tr>
-                <td>Fatturato</td>
+                <td>Fatturato (Noleggio + Vendita)</td>
                 <td>{formatCurrency(300000)}</td>
                 <td>{formatCurrency(600000)}</td>
                 <td>{formatCurrency(900000)}</td>
                 <td>{formatCurrency(1200000)}</td>
                 <td>{formatCurrency(1500000)}</td>
               </tr>
-              <tr>
-                <td>Costi di Produzione</td>
+              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Costi di Produzione (€500/pz)</td>
                 <td className="negative">{formatCurrency(-44000)}</td>
                 <td className="negative">{formatCurrency(-53000)}</td>
                 <td className="negative">{formatCurrency(-62000)}</td>
@@ -184,21 +203,45 @@ function App() {
                 <td className="positive">{formatCurrency(1129000)}</td>
                 <td className="positive">{formatCurrency(1420000)}</td>
               </tr>
-              <tr>
-                <td>Spese Operative (R&D, Pers, Log, Comm)</td>
-                <td className="negative">{formatCurrency(-383400)}</td>
-                <td className="negative">{formatCurrency(-311800)}</td>
-                <td className="negative">{formatCurrency(-430200)}</td>
-                <td className="negative">{formatCurrency(-548600)}</td>
-                <td className="negative">{formatCurrency(-629500)}</td>
+              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Personale (da 3 a 6 unità)</td>
+                <td className="negative">{formatCurrency(-112500)}</td>
+                <td className="negative">{formatCurrency(-150000)}</td>
+                <td className="negative">{formatCurrency(-187500)}</td>
+                <td className="negative">{formatCurrency(-225000)}</td>
+                <td className="negative">{formatCurrency(-225000)}</td>
               </tr>
-              <tr>
-                <td>EBIT (Risultato Operativo)</td>
-                <td className="negative">{formatCurrency(-127400)}</td>
-                <td className="positive" style={{ fontWeight: 'bold' }}>{formatCurrency(235200)}</td>
-                <td className="positive" style={{ fontWeight: 'bold' }}>{formatCurrency(407800)}</td>
-                <td className="positive" style={{ fontWeight: 'bold' }}>{formatCurrency(580400)}</td>
-                <td className="positive" style={{ fontWeight: 'bold' }}>{formatCurrency(790500)}</td>
+              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Logistica (€50/movimentazione)</td>
+                <td className="negative">{formatCurrency(-35900)}</td>
+                <td className="negative">{formatCurrency(-71800)}</td>
+                <td className="negative">{formatCurrency(-107700)}</td>
+                <td className="negative">{formatCurrency(-143600)}</td>
+                <td className="negative">{formatCurrency(-179500)}</td>
+              </tr>
+              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>Commerciale e Marketing (15%)</td>
+                <td className="negative">{formatCurrency(-45000)}</td>
+                <td className="negative">{formatCurrency(-90000)}</td>
+                <td className="negative">{formatCurrency(-135000)}</td>
+                <td className="negative">{formatCurrency(-180000)}</td>
+                <td className="negative">{formatCurrency(-225000)}</td>
+              </tr>
+              <tr style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                <td style={{ paddingLeft: '20px', fontSize: '0.9rem', color: '#9ca3af' }}>CAPEX (R&D, SW, Certificazione)</td>
+                <td className="negative">{formatCurrency(-190000)}</td>
+                <td className="negative">-</td>
+                <td className="negative">-</td>
+                <td className="negative">-</td>
+                <td className="negative">-</td>
+              </tr>
+              <tr style={{ borderTop: '2px solid rgba(255,255,255,0.1)' }}>
+                <td style={{ fontSize: '1.1rem' }}>EBIT (Risultato Operativo)</td>
+                <td className="negative" style={{ fontSize: '1.1rem' }}>{formatCurrency(-127400)}</td>
+                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(235200)}</td>
+                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(407800)}</td>
+                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(580400)}</td>
+                <td className="positive" style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{formatCurrency(790500)}</td>
               </tr>
             </tbody>
           </table>
