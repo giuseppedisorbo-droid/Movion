@@ -17,6 +17,13 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
         Il progetto mira a raggiungere un fatturato di <strong>{formatCurrency(kpis.targetRevenueY5)}</strong> entro il 5° anno, con un modello di ricavi basato su noleggi e vendite dirette in crescita lineare.
       </p>
 
+      <h4>1.1 Premessa Storica e Validazione del Mercato (Il Caso Seqex - "Anno 0")</h4>
+      <p>
+        L'iniziativa MOVION si fonda su una solida e comprovata esperienza sul campo iniziata nel 2018 con la commercializzazione del dispositivo <em>Seqex</em>, un apparecchio di terzi con caratteristiche terapeutiche e di mercato simili a quelle previste per MOVION.
+        Nel corso degli anni, EUBIOS ha investito nell'acquisto di circa <strong>250 apparecchiature Seqex</strong> per costruire la propria base clienti. A fine 2026, questa flotta esistente genererà un fatturato consolidato stimato in <strong>€ 300.000</strong>. 
+        Questo risultato storico rappresenta a tutti gli effetti il nostro <strong>"Anno 0"</strong>: una validazione assoluta e inconfutabile dell'interesse del mercato e della sostenibilità del modello di business basato sul noleggio, fornendo la base sicura su cui scalare il nuovo prodotto proprietario MOVION.
+      </p>
+
       <hr />
 
       <h3>2. Descrizione del Prodotto</h3>

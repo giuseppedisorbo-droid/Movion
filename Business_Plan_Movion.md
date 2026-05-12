@@ -6,6 +6,11 @@
 ## 1. Executive Summary
 Il presente Business Plan descrive il progetto di sviluppo, certificazione, produzione e commercializzazione di **MOVION**, un dispositivo elettromedicale proprietario basato su campi elettromagnetici a bassissima frequenza (ELF) e microcorrenti. Il progetto mira a raggiungere un fatturato di **€1.500.000** entro il 5° anno, con un modello di ricavi basato per il **70% su noleggi** e per il **30% su vendite dirette**.
 
+### 1.1 Premessa Storica e Validazione del Mercato (Il Caso Seqex - "Anno 0")
+L'iniziativa MOVION si fonda su una solida e comprovata esperienza sul campo iniziata nel 2018 con la commercializzazione del dispositivo *Seqex*, un apparecchio di terzi con caratteristiche terapeutiche e di mercato simili a quelle previste per MOVION.
+Nel corso degli anni, EUBIOS ha investito nell'acquisto di circa **250 apparecchiature Seqex** per costruire la propria base clienti. A fine 2026, questa flotta esistente genererà un fatturato consolidato stimato in **€ 300.000**. 
+Questo risultato storico rappresenta a tutti gli effetti il nostro **"Anno 0"**: una validazione assoluta e inconfutabile dell'interesse del mercato e della sostenibilità del modello di business basato sul noleggio, fornendo la base sicura su cui scalare il nuovo prodotto proprietario MOVION.
+
 ---
 
 ## 2. Descrizione del Prodotto
@@ -71,23 +76,31 @@ Il fatturato target è raggiunto con incremento costante annuo di €300.000:
 | **Ricavi da Noleggio (70%)** | €210.000 | €420.000 | €630.000 | €840.000 | **€1.050.000** |
 | **Ricavi da Vendita (30%)** | €90.000 | €180.000 | €270.000 | €360.000 | **€450.000** |
 
-### 6.4 Calcolo Unità / Contratti
+### 6.4 Composizione Analitica del Fatturato
 
-**Vendite (prezzo unitario €5.000):**
+La provenienza del fatturato è calcolata in modo realistico partendo dal prezzo di listino e dal tasso di utilizzo del parco macchine.
 
-| | Anno 1 | Anno 2 | Anno 3 | Anno 4 | Anno 5 |
-|---|---|---|---|---|---|
-| Ricavi Vendita | €90.000 | €180.000 | €270.000 | €360.000 | €450.000 |
-| **Unità Vendute** | **18** | **36** | **54** | **72** | **90** |
-
-**Noleggi (flotta e rotazione contratti):**
-*Ipotesi di base: Il noleggio medio dura 1 mese (€300). A regime, un singolo dispositivo genera in media 10 mesi di noleggio all'anno (resa = €3.000 / anno per apparecchio).*
+#### A. Fatturato da Vendita Diretta (30% dei ricavi)
+Prezzo di vendita unitario: **€ 5.000 + IVA**
 
 | | Anno 1 | Anno 2 | Anno 3 | Anno 4 | Anno 5 |
 |---|---|---|---|---|---|
-| Ricavi Noleggio | €210.000 | €420.000 | €630.000 | €840.000 | €1.050.000 |
-| **Apparecchi in Flotta Noleggio (Totali)** | **70** | **140** | **210** | **280** | **350** |
-| *Numero Pazienti / Contratti Generati* | *700* | *1.400* | *2.100* | *2.800* | *3.500* |
+| Obiettivo Ricavi Vendita | € 90.000 | € 180.000 | € 270.000 | € 360.000 | € 450.000 |
+| **Unità Vendute Necessarie** | **18 pz** | **36 pz** | **54 pz** | **72 pz** | **90 pz** |
+| *Media vendite mensili* | *1,5 / mese* | *3,0 / mese* | *4,5 / mese* | *6,0 / mese* | *7,5 / mese* |
+
+#### B. Fatturato da Noleggio a Pazienti (70% dei ricavi)
+Il noleggio genera marginalità altissima grazie alla rotazione di un'unica macchina.
+*   Tariffa noleggio: **€ 300 / mese** per paziente.
+*   Tasso di utilizzo (Yield): Un apparecchio è noleggiato per **10 mesi su 12** all'anno (2 mesi di margine per spedizioni, fermo tecnico, sanitizzazione).
+*   Resa annua: 10 mesi × €300 = **€ 3.000 generati ogni anno da ogni singola macchina in flotta**.
+
+| | Anno 1 | Anno 2 | Anno 3 | Anno 4 | Anno 5 |
+|---|---|---|---|---|---|
+| Obiettivo Ricavi Noleggio | € 210.000 | € 420.000 | € 630.000 | € 840.000 | € 1.050.000 |
+| **Flotta Operativa Necessaria** | **70 pz** | **140 pz** | **210 pz** | **280 pz** | **350 pz** |
+| *Giorni/paziente erogati (anno)* | *~21.000* | *~42.000* | *~63.000* | *~84.000* | *~105.000* |
+| *Mesi fatturati (singoli pazienti)* | *700* | *1.400* | *2.100* | *2.800* | *3.500* |
 
 ### 6.5 Fabbisogno di Produzione Totale (Cumulo 5 anni)
 
