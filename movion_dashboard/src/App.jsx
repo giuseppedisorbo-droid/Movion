@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon, Settings, Download } from 'lucide-react';
 import './App.css';
+import ReportDinamico from './ReportDinamico';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
@@ -55,6 +56,8 @@ function App() {
   };
 
   const [showSettings, setShowSettings] = useState(false);
+  const [printMode, setPrintMode] = useState('dashboard');
+
   const [config, setConfig] = useState(() => {
     const saved = localStorage.getItem('movionConfig');
     if (saved) {
@@ -171,8 +174,22 @@ function App() {
     };
   }, [config]);
 
+  const handlePrintDashboard = () => {
+    setPrintMode('dashboard');
+    setTimeout(() => window.print(), 100);
+  };
+
+  const handlePrintReport = () => {
+    setPrintMode('report');
+    setTimeout(() => {
+      window.print();
+      setPrintMode('dashboard');
+    }, 100);
+  };
+
   return (
-    <div className="dashboard-container">
+    <div className={`${printMode}-mode`}>
+      <div className="dashboard-container">
       <header className="header">
         <div className="header-title">
           <h1><span className="blue">MOVION</span> <span className="orange">Business Plan</span></h1>
@@ -189,14 +206,12 @@ function App() {
           <button className="outline" onClick={resetToDefault}>
             Ripristina
           </button>
-          <button className="outline" onClick={() => window.print()}>
+          <button className="outline" onClick={handlePrintDashboard}>
             Stampa Grafici
           </button>
-          <a href="/Business_Plan_Movion.pdf" download style={{ textDecoration: 'none' }}>
-            <button>
-              <Download size={18} /> Scarica Relazione
-            </button>
-          </a>
+          <button onClick={handlePrintReport}>
+            <Download size={18} /> Scarica Relazione
+          </button>
         </div>
       </header>
 
@@ -489,6 +504,13 @@ function App() {
           </table>
         </div>
       </div>
+      </div>
+      <ReportDinamico 
+        config={config} 
+        financialData={financialData} 
+        unitData={unitData} 
+        kpis={kpis} 
+      />
     </div>
   );
 }

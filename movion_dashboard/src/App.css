@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Tema Chiaro (Light Mode) */
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
@@ -61,6 +60,11 @@ h1, h2, h3, h4, h5 {
 .header-title p {
   color: var(--text-secondary);
   font-size: 1.1rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
 }
 
 .header-actions button {
@@ -209,8 +213,8 @@ h1, h2, h3, h4, h5 {
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.5rem;
-  height: 420px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 1.5rem;
 }
 
 .chart-header {
@@ -290,7 +294,6 @@ h1, h2, h3, h4, h5 {
   .charts-section {
     grid-template-columns: 1fr;
   }
-  .chart-container { height: auto; min-height: 400px; }
 }
 
 @media (max-width: 768px) {
@@ -307,6 +310,7 @@ h1, h2, h3, h4, h5 {
   }
   .header-actions {
     width: 100%;
+    flex-direction: column;
   }
   .header-actions button {
     width: 100%;
@@ -321,7 +325,6 @@ h1, h2, h3, h4, h5 {
   }
   .chart-container {
     padding: 1rem;
-    min-height: 350px;
   }
   .chart-header {
     flex-direction: column;
@@ -331,5 +334,90 @@ h1, h2, h3, h4, h5 {
   .financial-table th, .financial-table td {
     padding: 0.5rem;
     font-size: 0.8rem;
+  }
+}
+
+/* Stili per Report Dinamico */
+.report-document {
+  display: none;
+  font-family: 'Inter', sans-serif;
+  color: #000;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.report-document h1, .report-document h2, .report-document h3, .report-document h4 {
+  font-family: 'Outfit', sans-serif;
+  color: #0f172a;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.report-document h1 { font-size: 24pt; color: #1d4ed8; }
+.report-document h2 { font-size: 16pt; color: #64748b; font-weight: 400; }
+.report-document h3 { font-size: 14pt; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.2rem; }
+.report-document p, .report-document li { font-size: 11pt; line-height: 1.6; }
+.report-document hr { border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0; }
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 10pt;
+}
+
+.doc-table th, .doc-table td {
+  border: 1px solid #cbd5e1;
+  padding: 8px;
+  text-align: right;
+}
+
+.doc-table th:first-child, .doc-table td:first-child { text-align: left; }
+.doc-table th { background-color: #f8fafc; font-weight: bold; }
+.doc-table tr.highlight td { background-color: #f1f5f9; }
+.doc-table tr.highlight-dark td { background-color: #e2e8f0; }
+
+/* Controllo Stampa (Print Modes) */
+.dashboard-mode .report-document { display: none !important; }
+.report-mode .dashboard-container { display: none !important; }
+
+@media print {
+  body {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .header-actions, .settings-panel {
+    display: none !important;
+  }
+
+  /* Se stiamo stampando il report testuale */
+  .report-mode .report-document {
+    display: block !important;
+  }
+
+  /* Se stiamo stampando la dashboard */
+  .dashboard-mode .dashboard-container {
+    padding: 0;
+    max-width: 100%;
+  }
+  .dashboard-mode .chart-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+    margin-bottom: 2rem;
+  }
+  .dashboard-mode .stat-card {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+  .dashboard-mode .financial-table th {
+    background-color: #f1f5f9 !important;
+    -webkit-print-color-adjust: exact;
+  }
+  .dashboard-mode .badge {
+    border: 1px solid #999 !important;
+    -webkit-print-color-adjust: exact;
   }
 }

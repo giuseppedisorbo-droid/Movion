@@ -1,0 +1,217 @@
+import React from 'react';
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
+}
+
+export default function ReportDinamico({ config, financialData, unitData, kpis }) {
+  return (
+    <div className="report-document">
+      <h1>Business Plan: Dispositivo Elettromedicale MOVION</h1>
+      <h2>Campi Elettromagnetici ELF e Microcorrenti</h2>
+      <hr />
+
+      <h3>1. Executive Summary</h3>
+      <p>
+        Il presente Business Plan descrive il progetto di sviluppo, certificazione, produzione e commercializzazione di <strong>MOVION</strong>, un dispositivo elettromedicale proprietario basato su campi elettromagnetici a bassissima frequenza (ELF) e microcorrenti. 
+        Il progetto mira a raggiungere un fatturato di <strong>{formatCurrency(config.targetRevenueY5)}</strong> entro il 5° anno, con un modello di ricavi basato in prevalenza sui noleggi e sulle vendite dirette.
+      </p>
+
+      <hr />
+
+      <h3>2. Descrizione del Prodotto</h3>
+      <p><strong>Specifiche Tecniche e Design:</strong></p>
+      <ul>
+        <li><strong>Display:</strong> TFT da 4.3" touch capacitivo, incollato su vetro a dimensione del pannello frontale (ottima tenuta IP).</li>
+        <li><strong>Case:</strong> Contenitore da banco tipo Bopla BoPad (ABS, ~215x150 mm), frontale inclinato.</li>
+        <li><strong>Alimentazione:</strong> Modulo ingresso 100/230Vac, pre-omologato medicale.</li>
+        <li><strong>Uscite:</strong> Sdoppiamento applicatori, con canale dedicato alle microcorrenti.</li>
+      </ul>
+
+      <hr />
+
+      <h3>3. Pricing</h3>
+      <table className="doc-table">
+        <thead>
+          <tr><th>Modalità</th><th>Prezzo (IVA esclusa)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Vendita</strong></td><td><strong>{formatCurrency(config.priceSale)}</strong></td></tr>
+          <tr><td><strong>Noleggio</strong></td><td><strong>{formatCurrency(config.priceRental)} / mese</strong></td></tr>
+        </tbody>
+      </table>
+
+      <hr />
+
+      <h3>4. Strategia Regolatoria</h3>
+      <ul>
+        <li><strong>Marcatura CE</strong> secondo MDR 2017/745, Classe IIa.</li>
+        <li>Implementazione Sistema Qualità, redazione Fascicolo Tecnico e sviluppo informatico coperti da partner esterni ("chiavi in mano").</li>
+        <li>Valutazione Clinica (CER), prove di laboratorio EMC/Safety e tutte le autorizzazioni per l'immissione sul mercato.</li>
+      </ul>
+
+      <hr />
+
+      <h3>5. Piano Operativo e R&D</h3>
+      <ul>
+        <li><strong>Time-to-market stimato:</strong> 52 settimane (1 anno).</li>
+        <li><strong>Costo sviluppo elettronico (SELMO):</strong> €80.000.</li>
+        <li><strong>Sviluppo informatico e autorizzazioni:</strong> €110.000.</li>
+      </ul>
+      <p><strong>Costo unitario di produzione (BOM su lotti 200/300 pz):</strong></p>
+      <table className="doc-table">
+        <thead>
+          <tr><th>Componente</th><th>Costo Stimato</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Elettronica Principale (Scheda + Display TFT 4.3")</td><td>~ €280</td></tr>
+          <tr><td>Contenitore ABS (es. Bopla BoPad) e meccanica</td><td>~ €55</td></tr>
+          <tr><td><strong>Accessori (Applicatori/Bobine)</strong></td><td><strong>€150</strong></td></tr>
+          <tr><td>Alimentatore medicale, manuale e packaging</td><td>~ €15</td></tr>
+          <tr className="highlight"><td><strong>Totale Costo Unitario di Produzione</strong></td><td><strong>{formatCurrency(config.costProduction)}</strong></td></tr>
+        </tbody>
+      </table>
+
+      <hr />
+
+      <h3>6. Piano Finanziario a 5 Anni (Dinamico)</h3>
+
+      <h4>6.1 Proiezione Fatturato</h4>
+      <table className="doc-table">
+        <thead>
+          <tr><th></th><th>Anno 1</th><th>Anno 2</th><th>Anno 3</th><th>Anno 4</th><th>Anno 5</th></tr>
+        </thead>
+        <tbody>
+          <tr className="highlight">
+            <td><strong>Fatturato Totale</strong></td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.revenue)}</td>)}
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>6.2 Composizione Analitica del Fatturato</h4>
+      <p><strong>A. Fatturato da Vendita Diretta (Prezzo Unitario: {formatCurrency(config.priceSale)})</strong></p>
+      <table className="doc-table">
+        <thead>
+          <tr><th></th><th>Anno 1</th><th>Anno 2</th><th>Anno 3</th><th>Anno 4</th><th>Anno 5</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Obiettivo Ricavi Vendita</td>
+            {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revSale)}</td>)}
+          </tr>
+          <tr className="highlight">
+            <td><strong>Unità Vendute Necessarie</strong></td>
+            {unitData.map((d, i) => <td key={i}><strong>{Math.round(d.salesUnits)} pz</strong></td>)}
+          </tr>
+        </tbody>
+      </table>
+
+      <p><strong>B. Fatturato da Noleggio (Tariffa: {formatCurrency(config.priceRental)}/mese - Resa: {config.rentalYieldMonths} mesi/anno)</strong></p>
+      <table className="doc-table">
+        <thead>
+          <tr><th></th><th>Anno 1</th><th>Anno 2</th><th>Anno 3</th><th>Anno 4</th><th>Anno 5</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Obiettivo Ricavi Noleggio</td>
+            {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revRental)}</td>)}
+          </tr>
+          <tr className="highlight">
+            <td><strong>Flotta Operativa Necessaria</strong></td>
+            {unitData.map((d, i) => <td key={i}><strong>{Math.round(d.fleet)} pz</strong></td>)}
+          </tr>
+          <tr>
+            <td>Mesi fatturati (singoli contratti)</td>
+            {unitData.map((d, i) => <td key={i}>{Math.round(d.contracts)}</td>)}
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>6.3 Fabbisogno di Produzione Totale</h4>
+      <table className="doc-table">
+        <thead>
+          <tr><th></th><th>Anno 1</th><th>Anno 2</th><th>Anno 3</th><th>Anno 4</th><th>Anno 5</th><th>Totale</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Unità per Vendita</td>
+            {unitData.map((d, i) => <td key={i}>{Math.round(d.salesUnits)}</td>)}
+            <td>{Math.round(unitData.reduce((a, b) => a + b.salesUnits, 0))}</td>
+          </tr>
+          <tr>
+            <td>Nuove Unità per Flotta Noleggio</td>
+            {unitData.map((d, i) => <td key={i}>{Math.round(d.newFleetUnits)}</td>)}
+            <td>{Math.round(unitData.reduce((a, b) => a + b.newFleetUnits, 0))}</td>
+          </tr>
+          <tr className="highlight">
+            <td><strong>Totale Unità da Produrre</strong></td>
+            {unitData.map((d, i) => <td key={i}><strong>{Math.round(d.unitsProduced)}</strong></td>)}
+            <td><strong>{Math.round(kpis.totalUnitsProducedOverall)}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>6.4 Conto Economico Semplificato</h4>
+      <table className="doc-table">
+        <thead>
+          <tr><th></th><th>Anno 1</th><th>Anno 2</th><th>Anno 3</th><th>Anno 4</th><th>Anno 5</th></tr>
+        </thead>
+        <tbody>
+          <tr className="highlight">
+            <td><strong>Ricavi Totali</strong></td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.revenue)}</td>)}
+          </tr>
+          <tr>
+            <td>Costi Produzione</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.production)}</td>)}
+          </tr>
+          <tr>
+            <td><strong>Margine Lordo</strong></td>
+            {financialData.map((d, i) => <td key={i}><strong>{formatCurrency(d.grossMargin)}</strong></td>)}
+          </tr>
+          <tr>
+            <td>Costi Logistica</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.logistics)}</td>)}
+          </tr>
+          <tr>
+            <td>Costo Personale</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.personnel)}</td>)}
+          </tr>
+          <tr>
+            <td>Costi Commerciali</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.commercial)}</td>)}
+          </tr>
+          <tr>
+            <td>CAPEX</td>
+            {financialData.map((d, i) => <td key={i}>{d.capex !== 0 ? formatCurrency(d.capex) : '-'}</td>)}
+          </tr>
+          <tr className="highlight-dark">
+            <td><strong>Risultato Operativo (EBIT)</strong></td>
+            {financialData.map((d, i) => <td key={i}><strong>{formatCurrency(d.ebit)}</strong></td>)}
+          </tr>
+          <tr>
+            <td>% EBIT Margin</td>
+            {financialData.map((d, i) => <td key={i}>{((d.ebit / d.revenue) * 100).toFixed(1)}%</td>)}
+          </tr>
+        </tbody>
+      </table>
+
+      <hr />
+
+      <h3>7. Riepilogo KPI Target</h3>
+      <table className="doc-table">
+        <tbody>
+          <tr><td>Fatturato Target Anno 5</td><td>{formatCurrency(config.targetRevenueY5)}</td></tr>
+          <tr><td><strong>Costo Spedizione/Ritiro</strong></td><td><strong>{formatCurrency(config.costLogistics)} fissi</strong></td></tr>
+          <tr><td>Investimento Iniziale CAPEX</td><td>{formatCurrency(config.capex)}</td></tr>
+          <tr><td>Costo Personale Annuo Unitario</td><td>{formatCurrency(config.personnelCost)}/anno</td></tr>
+          <tr><td>Costi Commerciali / Provvigioni</td><td>{config.commercialPercent}% del Fatturato</td></tr>
+          <tr><td>Costo Unitario Produzione (Device)</td><td>{formatCurrency(config.costProduction)}</td></tr>
+          <tr><td>Apparecchi in Flotta Noleggio (Anno 5)</td><td>{Math.round(kpis.finalFleet)} unità</td></tr>
+          <tr className="highlight"><td><strong>EBIT Totale (Cumulato 5 Anni)</strong></td><td><strong>{formatCurrency(kpis.totalEbit)}</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
