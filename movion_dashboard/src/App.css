@@ -292,3 +292,44 @@ h1, h2, h3, h4, h5 {
   }
   .chart-container { height: auto; min-height: 400px; }
 }
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .header-title h1 {
+    font-size: 2rem;
+  }
+  .header-actions {
+    width: 100%;
+  }
+  .header-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  .settings-panel {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  .grid-cards {
+    grid-template-columns: 1fr;
+  }
+  .chart-container {
+    padding: 1rem;
+    min-height: 350px;
+  }
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .financial-table th, .financial-table td {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+}
