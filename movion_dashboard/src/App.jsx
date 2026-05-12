@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon, Settings, Download } from 'lucide-react';
 import './App.css';
 import ReportDinamico from './ReportDinamico';
+import { db } from './firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(value);
@@ -67,29 +69,35 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [printMode, setPrintMode] = useState('dashboard');
 
-  const [config, setConfig] = useState(() => {
-    const saved = localStorage.getItem('movionConfig');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return { ...defaultConfig, ...parsed };
-      } catch(e) {}
-    }
-    return defaultConfig;
-  });
+  const [config, setConfig] = useState(defaultConfig);
 
-  React.useEffect(() => {
-    localStorage.setItem('movionConfig', JSON.stringify(config));
-  }, [config]);
+  useEffect(() => {
+    const unsub = onSnapshot(doc(db, 'simulations', 'main'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setConfig(prev => {
+          if (JSON.stringify(prev) === JSON.stringify(data)) return prev;
+          return { ...defaultConfig, ...data };
+        });
+      } else {
+        setDoc(doc(db, 'simulations', 'main'), defaultConfig);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setConfig(prev => ({ ...prev, [name]: value === '' ? '' : value }));
+    setConfig(prev => {
+      const next = { ...prev, [name]: value === '' ? '' : value };
+      setDoc(doc(db, 'simulations', 'main'), next);
+      return next;
+    });
   };
 
   const resetToDefault = () => {
-    if(window.confirm('Vuoi ripristinare i valori predefiniti del Business Plan?')) {
-      setConfig(defaultConfig);
+    if(window.confirm('Vuoi ripristinare i valori predefiniti per TUTTI i dispositivi connessi?')) {
+      setDoc(doc(db, 'simulations', 'main'), defaultConfig);
     }
   };
 
