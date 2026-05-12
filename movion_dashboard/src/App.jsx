@@ -116,6 +116,7 @@ function App() {
     let fData = [];
     let uData = [];
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totIns = 0;
+    let totRevSaleOverall = 0, totRevRentalOverall = 0;
     
     const personnelGrowth = [3, 4, 5, 6, 6];
     let totalUnitsProducedOverall = 0;
@@ -152,6 +153,8 @@ function App() {
       totMaint += costMaintenance;
       totIns += cInsurance;
       totalUnitsProducedOverall += unitsProduced;
+      totRevSaleOverall += revSale;
+      totRevRentalOverall += revRental;
 
       fData.push({
         year: `Anno ${i + 1}`,
@@ -191,13 +194,20 @@ function App() {
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
 
     const targetRevenueY5 = fData[4].revenue || 1;
-    const saleRatioY5 = (uData[4].revSale / targetRevenueY5) * 100;
+    const saleRatioY5 = (uData[4].sales / (uData[4].sales + uData[4].newRental)) * 100 || 30; // fallback
+
+    const totalRevCore = totRevSaleOverall + totRevRentalOverall;
+    const badgeRentalPercent = totalRevCore > 0 ? Math.round((totRevRentalOverall / totalRevCore) * 100) : 70;
+    const badgeSalePercent = totalRevCore > 0 ? Math.round((totRevSaleOverall / totalRevCore) * 100) : 30;
 
     return { 
       financialData: fData, 
       unitData: uData,
       totals: totalOpex,
-      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall, targetRevenueY5, saleRatioY5, cProd, cCapex }
+      kpis: { 
+        totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall, targetRevenueY5, saleRatioY5, cProd, cCapex,
+        badgeRentalPercent, badgeSalePercent
+      }
     };
   }, [config]);
 
@@ -223,7 +233,7 @@ function App() {
           <p>Dashboard Dinamica & Generatore di Report</p>
           <div className="badges-row">
             <span className="badge blue">Modello Interattivo</span>
-            <span className="badge orange">Noleggio 70% / Vendita 30%</span>
+            <span className="badge orange">Noleggio {kpis.badgeRentalPercent}% / Vendita {kpis.badgeSalePercent}%</span>
           </div>
         </div>
         <div className="header-actions">
