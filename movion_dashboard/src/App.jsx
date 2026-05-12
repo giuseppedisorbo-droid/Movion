@@ -52,8 +52,8 @@ function App() {
     priceRental: 300,
     rentalYieldMonths: 10,
     costElectronics: 280,
-    costMechanics: 55,
-    costAccessories: 150,
+    costMechanics: 50,
+    costAccessories: 200,
     costPackaging: 15,
     costLogistics: 50,
     commercialPercent: 15,
@@ -139,7 +139,16 @@ function App() {
       
       let unitsProduced = salesUnits + newRentalUnits;
       
-      let costProd = unitsProduced * cProd;
+      let costProd = 0;
+      let costAcc = Number(config.costAccessories) || 0;
+      for (let u = 0; u < unitsProduced; u++) {
+        let currentUnitIndex = totalUnitsProducedOverall + u + 1;
+        if (currentUnitIndex <= 300) {
+          costProd += costAcc; // Solo accessori, il resto è coperto dal CAPEX
+        } else {
+          costProd += cProd;
+        }
+      }
       
       let logisticsCount = (rentalFleet * rYield) + salesUnits;
       let costLogistics = logisticsCount * cLog;

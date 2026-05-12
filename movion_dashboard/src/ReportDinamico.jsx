@@ -62,7 +62,7 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
       <h3>5. Piano Operativo e R&D</h3>
       <ul>
         <li><strong>Time-to-market stimato:</strong> 52 settimane (1 anno).</li>
-        <li><strong>Sviluppo Elettronica (R&D):</strong> {formatCurrency(config.capexElectronics)}.</li>
+        <li><strong>Sviluppo Elettronica, R&D e Produzione Primi 300 pz:</strong> {formatCurrency(config.capexElectronics)}.*</li>
         <li><strong>Sviluppo Informatico e Certificazioni:</strong> {formatCurrency(config.capexIT)}.</li>
         {config.capexMarketing > 0 && <li><strong>Budget Marketing Iniziale:</strong> {formatCurrency(config.capexMarketing)}.</li>}
       </ul>
@@ -79,6 +79,9 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
           <tr className="highlight"><td><strong>Totale Costo Unitario di Produzione</strong></td><td><strong>{formatCurrency(kpis.cProd)}</strong></td></tr>
         </tbody>
       </table>
+      <p style={{fontSize: '0.85em', color: '#64748b'}}>
+        <em>* Nota: L'investimento di {formatCurrency(config.capexElectronics)} copre già per intero i costi di Elettronica, Meccanica e Packaging per i primi 300 pezzi. Per queste unità inziali l'unico costo operativo (OPEX) sostenuto è relativo all'acquisto degli Accessori ({formatCurrency(config.costAccessories)}/pz). Dal 301° pezzo in poi si applicherà il costo unitario completo.</em>
+      </p>
 
       <hr />
 
