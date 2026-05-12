@@ -62,8 +62,9 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
       <h3>5. Piano Operativo e R&D</h3>
       <ul>
         <li><strong>Time-to-market stimato:</strong> 52 settimane (1 anno).</li>
-        <li><strong>Costo sviluppo elettronico (SELMO):</strong> €80.000.</li>
-        <li><strong>Sviluppo informatico e autorizzazioni:</strong> €110.000.</li>
+        <li><strong>Sviluppo Elettronica (R&D):</strong> {formatCurrency(config.capexElectronics)}.</li>
+        <li><strong>Sviluppo Informatico e Certificazioni:</strong> {formatCurrency(config.capexIT)}.</li>
+        {config.capexMarketing > 0 && <li><strong>Budget Marketing Iniziale:</strong> {formatCurrency(config.capexMarketing)}.</li>}
       </ul>
       <p><strong>Costo unitario di produzione (BOM su lotti 200/300 pz):</strong></p>
       <table className="doc-table">
@@ -71,11 +72,11 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
           <tr><th>Componente</th><th>Costo Stimato</th></tr>
         </thead>
         <tbody>
-          <tr><td>Elettronica Principale (Scheda + Display TFT 4.3")</td><td>~ €280</td></tr>
-          <tr><td>Contenitore ABS (es. Bopla BoPad) e meccanica</td><td>~ €55</td></tr>
-          <tr><td><strong>Accessori (Applicatori/Bobine)</strong></td><td><strong>€150</strong></td></tr>
-          <tr><td>Alimentatore medicale, manuale e packaging</td><td>~ €15</td></tr>
-          <tr className="highlight"><td><strong>Totale Costo Unitario di Produzione</strong></td><td><strong>{formatCurrency(config.costProduction)}</strong></td></tr>
+          <tr><td>Elettronica Principale (Scheda + Display TFT 4.3")</td><td>{formatCurrency(config.costElectronics)}</td></tr>
+          <tr><td>Contenitore ABS (es. Bopla BoPad) e meccanica</td><td>{formatCurrency(config.costMechanics)}</td></tr>
+          <tr><td><strong>Accessori (Applicatori/Bobine)</strong></td><td><strong>{formatCurrency(config.costAccessories)}</strong></td></tr>
+          <tr><td>Alimentatore medicale, manuale e packaging</td><td>{formatCurrency(config.costPackaging)}</td></tr>
+          <tr className="highlight"><td><strong>Totale Costo Unitario di Produzione</strong></td><td><strong>{formatCurrency(kpis.cProd)}</strong></td></tr>
         </tbody>
       </table>
 
@@ -194,7 +195,11 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
             {financialData.map((d, i) => <td key={i}>{formatCurrency(d.maintenance)}</td>)}
           </tr>
           <tr>
-            <td>CAPEX</td>
+            <td>Assicurazioni/Cert. Annue</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.insurance)}</td>)}
+          </tr>
+          <tr>
+            <td>CAPEX Iniziale</td>
             {financialData.map((d, i) => <td key={i}>{d.capex !== 0 ? formatCurrency(d.capex) : '-'}</td>)}
           </tr>
           <tr className="highlight-dark">
@@ -215,11 +220,11 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
         <tbody>
           <tr><td>Fatturato Target Anno 5</td><td>{formatCurrency(kpis.targetRevenueY5)}</td></tr>
           <tr><td><strong>Costo Spedizione/Ritiro</strong></td><td><strong>{formatCurrency(config.costLogistics)} fissi</strong></td></tr>
-          <tr><td>Investimento Iniziale CAPEX</td><td>{formatCurrency(config.capex)}</td></tr>
-          <tr><td>Costo Personale Annuo Unitario</td><td>{formatCurrency(config.personnelCost)}/anno</td></tr>
+          <tr><td>Investimento Iniziale (CAPEX Totale)</td><td>{formatCurrency(kpis.cCapex)}</td></tr>
+          <tr><td>Costo Personale Annuo Unitario (Anno 1)</td><td>{formatCurrency(config.personnelCost)}/anno (inflazione {config.personnelInflation}%)</td></tr>
           <tr><td>Costi Commerciali / Provvigioni</td><td>{config.commercialPercent}% del Fatturato</td></tr>
           <tr><td>Costi Manutenzione / Ricambi</td><td>{config.maintenancePercent}% del Fatturato</td></tr>
-          <tr><td>Costo Unitario Produzione (Device)</td><td>{formatCurrency(config.costProduction)}</td></tr>
+          <tr><td>Costo Unitario Produzione (Device)</td><td>{formatCurrency(kpis.cProd)}</td></tr>
           <tr><td>Apparecchi in Flotta Noleggio (Anno 5)</td><td>{Math.round(kpis.finalFleet)} unità</td></tr>
           <tr className="highlight"><td><strong>EBIT Totale (Cumulato 5 Anni)</strong></td><td><strong>{formatCurrency(kpis.totalEbit)}</strong></td></tr>
         </tbody>

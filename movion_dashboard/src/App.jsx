@@ -49,12 +49,19 @@ function App() {
     priceSale: 5000,
     priceRental: 300,
     rentalYieldMonths: 10,
-    costProduction: 500,
+    costElectronics: 280,
+    costMechanics: 55,
+    costAccessories: 150,
+    costPackaging: 15,
     costLogistics: 50,
-    capex: 190000,
-    personnelCost: 37500,
     commercialPercent: 15,
     maintenancePercent: 3,
+    insuranceAnnual: 5000,
+    personnelCost: 37500,
+    personnelInflation: 2,
+    capexElectronics: 80000,
+    capexIT: 110000,
+    capexMarketing: 0,
   };
 
   const [showSettings, setShowSettings] = useState(false);
@@ -92,19 +99,23 @@ function App() {
     const pSale = Number(config.priceSale) || 1;
     const pRental = Number(config.priceRental) || 1;
     const rYield = Number(config.rentalYieldMonths) || 1;
-    const cProd = Number(config.costProduction) || 0;
+    
+    const cProd = (Number(config.costElectronics)||0) + (Number(config.costMechanics)||0) + (Number(config.costAccessories)||0) + (Number(config.costPackaging)||0);
     const cLog = Number(config.costLogistics) || 0;
     const cPers = Number(config.personnelCost) || 0;
+    const cPersInf = Number(config.personnelInflation) || 0;
     const cComm = Number(config.commercialPercent) || 0;
-    const cCapex = Number(config.capex) || 0;
     const cMaint = Number(config.maintenancePercent) || 0;
+    const cInsurance = Number(config.insuranceAnnual) || 0;
+    
+    const cCapex = (Number(config.capexElectronics)||0) + (Number(config.capexIT)||0) + (Number(config.capexMarketing)||0);
 
     const stepSales = salesY5 / 5;
     const stepFleet = fleetY5 / 5;
     
     let fData = [];
     let uData = [];
-    let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0;
+    let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totIns = 0;
     
     const personnelGrowth = [3, 4, 5, 6, 6];
     let totalUnitsProducedOverall = 0;
@@ -126,18 +137,19 @@ function App() {
       let logisticsCount = (rentalFleet * rYield) + salesUnits;
       let costLogistics = logisticsCount * cLog;
       
-      let costPersonnel = personnelGrowth[i] * cPers;
+      let costPersonnel = personnelGrowth[i] * cPers * Math.pow(1 + (cPersInf / 100), i);
       let costCommercial = revenue * (cComm / 100);
       let costMaintenance = revenue * (cMaint / 100);
       let capexy = i === 0 ? cCapex : 0;
       
-      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - costMaintenance - capexy;
+      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - costMaintenance - cInsurance - capexy;
       
       totProd += costProd;
       totLog += costLogistics;
       totPers += costPersonnel;
       totComm += costCommercial;
       totMaint += costMaintenance;
+      totIns += cInsurance;
       totalUnitsProducedOverall += unitsProduced;
 
       fData.push({
@@ -148,6 +160,7 @@ function App() {
         personnel: -costPersonnel,
         commercial: -costCommercial,
         maintenance: -costMaintenance,
+        insurance: -cInsurance,
         capex: -capexy,
         ebit,
         grossMargin: revenue - costProd
@@ -171,6 +184,7 @@ function App() {
       { name: 'Personale', value: totPers, color: '#2563eb' },
       { name: 'Commerciale', value: totComm, color: '#059669' },
       { name: 'Manutenzione', value: totMaint, color: '#f59e0b' },
+      { name: 'Assicurazione/Cert.', value: totIns, color: '#eab308' },
     ];
 
     const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
@@ -182,7 +196,7 @@ function App() {
       financialData: fData, 
       unitData: uData,
       totals: totalOpex,
-      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall, targetRevenueY5, saleRatioY5 }
+      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall, targetRevenueY5, saleRatioY5, cProd, cCapex }
     };
   }, [config]);
 
@@ -228,46 +242,111 @@ function App() {
       </header>
 
       {showSettings && (
-        <div className="settings-panel">
-          <div className="setting-group">
-            <label>Unità Vendute (Obiettivo A5)</label>
-            <input type="number" name="targetSalesUnitsY5" value={config.targetSalesUnitsY5} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Flotta Noleggio (Obiettivo A5)</label>
-            <input type="number" name="targetFleetY5" value={config.targetFleetY5} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Prezzo Vendita Unitario (€)</label>
-            <input type="number" name="priceSale" value={config.priceSale} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Tariffa Noleggio Mensile (€)</label>
-            <input type="number" name="priceRental" value={config.priceRental} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Mesi Rotazione Annua</label>
-            <input type="number" name="rentalYieldMonths" value={config.rentalYieldMonths} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Costo Produzione (BOM) (€)</label>
-            <input type="number" name="costProduction" value={config.costProduction} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Costo Spedizione/Ritiro (€)</label>
-            <input type="number" name="costLogistics" value={config.costLogistics} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Costo Personale Annuo (€)</label>
-            <input type="number" name="personnelCost" value={config.personnelCost} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Provvigioni Commerciali (%)</label>
-            <input type="number" name="commercialPercent" value={config.commercialPercent} onChange={handleChange} />
-          </div>
-          <div className="setting-group">
-            <label>Costo Manutenzione (%)</label>
-            <input type="number" name="maintenancePercent" value={config.maintenancePercent} onChange={handleChange} />
+        <div className="settings-grid-container">
+          <div className="settings-grid">
+            
+            {/* GRUPPO 1 */}
+            <div className="setting-card group-green">
+              <h3><TrendingUp size={18}/> Obiettivi Commerciali</h3>
+              <div className="setting-group">
+                <label>Unità Vendute (Obiettivo A5)</label>
+                <input type="number" name="targetSalesUnitsY5" value={config.targetSalesUnitsY5} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Flotta Noleggio (Obiettivo A5)</label>
+                <input type="number" name="targetFleetY5" value={config.targetFleetY5} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* GRUPPO 2 */}
+            <div className="setting-card group-blue">
+              <h3><DollarSign size={18}/> Pricing e Ricavi</h3>
+              <div className="setting-group">
+                <label>Prezzo Vendita Unitario (€)</label>
+                <input type="number" name="priceSale" value={config.priceSale} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Tariffa Noleggio (€/mese)</label>
+                <input type="number" name="priceRental" value={config.priceRental} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Rotazione Noleggio (Mesi/anno)</label>
+                <input type="number" name="rentalYieldMonths" value={config.rentalYieldMonths} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* GRUPPO 3 */}
+            <div className="setting-card group-gray">
+              <h3><Package size={18}/> Costi Produzione (Distinta)</h3>
+              <div className="setting-group">
+                <label>Elettronica e Display (€)</label>
+                <input type="number" name="costElectronics" value={config.costElectronics} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Case e Meccanica (€)</label>
+                <input type="number" name="costMechanics" value={config.costMechanics} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Accessori e Bobine (€)</label>
+                <input type="number" name="costAccessories" value={config.costAccessories} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Alimentatore/Packaging (€)</label>
+                <input type="number" name="costPackaging" value={config.costPackaging} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* GRUPPO 4 */}
+            <div className="setting-card group-orange">
+              <h3><Activity size={18}/> Costi Operativi (OPEX)</h3>
+              <div className="setting-group">
+                <label>Spedizione Singola A/R (€)</label>
+                <input type="number" name="costLogistics" value={config.costLogistics} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Provvigioni Commerciali (%)</label>
+                <input type="number" name="commercialPercent" value={config.commercialPercent} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Costo Manutenzione (%)</label>
+                <input type="number" name="maintenancePercent" value={config.maintenancePercent} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Assicurazione/Certif. Annua (€)</label>
+                <input type="number" name="insuranceAnnual" value={config.insuranceAnnual} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* GRUPPO 5 */}
+            <div className="setting-card group-indigo">
+              <h3><PieChartIcon size={18}/> Risorse Umane</h3>
+              <div className="setting-group">
+                <label>Costo Personale Annuo (€)</label>
+                <input type="number" name="personnelCost" value={config.personnelCost} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Inflazione/Scatti Annui (%)</label>
+                <input type="number" name="personnelInflation" value={config.personnelInflation} onChange={handleChange} />
+              </div>
+            </div>
+
+            {/* GRUPPO 6 */}
+            <div className="setting-card group-red">
+              <h3><BarChart3 size={18}/> Investimenti Iniziali (CAPEX)</h3>
+              <div className="setting-group">
+                <label>Sviluppo Elettronica R&D (€)</label>
+                <input type="number" name="capexElectronics" value={config.capexElectronics} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>IT, Software e MDR (€)</label>
+                <input type="number" name="capexIT" value={config.capexIT} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Budget Marketing Iniziale (€)</label>
+                <input type="number" name="capexMarketing" value={config.capexMarketing} onChange={handleChange} />
+              </div>
+            </div>
+
           </div>
         </div>
       )}
@@ -408,10 +487,14 @@ function App() {
                 <td style={{ paddingLeft: '20px', color: '#64748b' }}>Manutenzione e Ricambi ({config.maintenancePercent}%)</td>
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.maintenance)}</td>)}
               </tr>
+              <tr>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Assicurazione e Cert. Annue</td>
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.insurance)}</td>)}
+              </tr>
               
               <tr style={{ backgroundColor: '#fff7ed' }}>
                 <td style={{ fontWeight: 600, color: '#c2410c' }}>Subtotale OPEX</td>
-                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial + d.maintenance)}</td>)}
+                {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.personnel + d.logistics + d.commercial + d.maintenance + d.insurance)}</td>)}
               </tr>
 
               <tr>
