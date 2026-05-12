@@ -42,8 +42,7 @@ function StatCard({ title, value, icon: Icon, trend, trendValue, colorClass = "b
 }
 
 function App() {
-  const [showSettings, setShowSettings] = useState(false);
-  const [config, setConfig] = useState({
+  const defaultConfig = {
     targetRevenueY5: 1500000,
     priceSale: 5000,
     priceRental: 300,
@@ -53,15 +52,46 @@ function App() {
     capex: 190000,
     personnelCost: 37500,
     commercialPercent: 15,
+  };
+
+  const [showSettings, setShowSettings] = useState(false);
+  const [config, setConfig] = useState(() => {
+    const saved = localStorage.getItem('movionConfig');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch(e) {}
+    }
+    return defaultConfig;
   });
+
+  React.useEffect(() => {
+    localStorage.setItem('movionConfig', JSON.stringify(config));
+  }, [config]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setConfig(prev => ({ ...prev, [name]: Number(value) }));
+    setConfig(prev => ({ ...prev, [name]: value === '' ? '' : value }));
+  };
+
+  const resetToDefault = () => {
+    if(window.confirm('Vuoi ripristinare i valori predefiniti del Business Plan?')) {
+      setConfig(defaultConfig);
+    }
   };
 
   const { financialData, unitData, totals, kpis } = useMemo(() => {
-    const step = config.targetRevenueY5 / 5;
+    const targetRev = Number(config.targetRevenueY5) || 0;
+    const pSale = Number(config.priceSale) || 1;
+    const pRental = Number(config.priceRental) || 1;
+    const rYield = Number(config.rentalYieldMonths) || 1;
+    const cProd = Number(config.costProduction) || 0;
+    const cLog = Number(config.costLogistics) || 0;
+    const cPers = Number(config.personnelCost) || 0;
+    const cComm = Number(config.commercialPercent) || 0;
+    const cCapex = Number(config.capex) || 0;
+
+    const step = targetRev / 5;
     let fData = [];
     let uData = [];
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0;
@@ -75,22 +105,22 @@ function App() {
       let revRental = revenue * 0.70;
       let revSale = revenue * 0.30;
       
-      let salesUnits = revSale / config.priceSale;
-      let rentalYieldPerDevice = config.rentalYieldMonths * config.priceRental;
+      let salesUnits = revSale / pSale;
+      let rentalYieldPerDevice = rYield * pRental;
       let rentalFleet = revRental / rentalYieldPerDevice; 
       
       let prevFleet = i === 0 ? 0 : ((step * i) * 0.70) / rentalYieldPerDevice;
       let newRentalUnits = rentalFleet - prevFleet;
       let unitsProduced = salesUnits + newRentalUnits;
       
-      let costProd = unitsProduced * config.costProduction;
+      let costProd = unitsProduced * cProd;
       
-      let logisticsCount = (rentalFleet * config.rentalYieldMonths) + salesUnits;
-      let costLogistics = logisticsCount * config.costLogistics;
+      let logisticsCount = (rentalFleet * rYield) + salesUnits;
+      let costLogistics = logisticsCount * cLog;
       
-      let costPersonnel = personnelGrowth[i] * config.personnelCost;
-      let costCommercial = revenue * (config.commercialPercent / 100);
-      let capexy = i === 0 ? config.capex : 0;
+      let costPersonnel = personnelGrowth[i] * cPers;
+      let costCommercial = revenue * (cComm / 100);
+      let capexy = i === 0 ? cCapex : 0;
       
       let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - capexy;
       
@@ -155,6 +185,9 @@ function App() {
         <div className="header-actions">
           <button className="outline" onClick={() => setShowSettings(!showSettings)}>
             <Settings size={18} /> Variabili
+          </button>
+          <button className="outline" onClick={resetToDefault}>
+            Ripristina
           </button>
           <button className="outline" onClick={() => window.print()}>
             Stampa Grafici
