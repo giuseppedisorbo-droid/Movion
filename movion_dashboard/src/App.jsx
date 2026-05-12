@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
-import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon, Settings } from 'lucide-react';
+import { TrendingUp, Activity, DollarSign, Package, BarChart3, PieChart as PieChartIcon, Settings, Download } from 'lucide-react';
 import './App.css';
 
 function formatCurrency(value) {
@@ -60,34 +60,31 @@ function App() {
     setConfig(prev => ({ ...prev, [name]: Number(value) }));
   };
 
-  // Calcolo Dinamico di tutto il BP
-  const { financialData, totals, kpis } = useMemo(() => {
+  const { financialData, unitData, totals, kpis } = useMemo(() => {
     const step = config.targetRevenueY5 / 5;
-    let data = [];
+    let fData = [];
+    let uData = [];
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0;
     
-    // Assumiamo che le unità di personale crescano organicamente con i ricavi (hardcoded growth logic)
     const personnelGrowth = [3, 4, 5, 6, 6];
+    let totalUnitsProducedOverall = 0;
 
     for (let i = 0; i < 5; i++) {
       let revenue = step * (i + 1);
       
-      // Assumiamo sempre 70% noleggio e 30% vendita come da target fisso, o calcoliamolo.
       let revRental = revenue * 0.70;
       let revSale = revenue * 0.30;
       
       let salesUnits = revSale / config.priceSale;
       let rentalYieldPerDevice = config.rentalYieldMonths * config.priceRental;
-      let rentalFleet = revRental / rentalYieldPerDevice; // flotta totale operativa necessaria in quell'anno
+      let rentalFleet = revRental / rentalYieldPerDevice; 
       
-      // Unità da produrre quell'anno = vendite + nuovi noleggi
       let prevFleet = i === 0 ? 0 : ((step * i) * 0.70) / rentalYieldPerDevice;
       let newRentalUnits = rentalFleet - prevFleet;
       let unitsProduced = salesUnits + newRentalUnits;
       
       let costProd = unitsProduced * config.costProduction;
       
-      // Logistica: (flotta * mesi rotazione) + vendite = numero di spedizioni totali
       let logisticsCount = (rentalFleet * config.rentalYieldMonths) + salesUnits;
       let costLogistics = logisticsCount * config.costLogistics;
       
@@ -101,8 +98,9 @@ function App() {
       totLog += costLogistics;
       totPers += costPersonnel;
       totComm += costCommercial;
+      totalUnitsProducedOverall += unitsProduced;
 
-      data.push({
+      fData.push({
         year: `Anno ${i + 1}`,
         revenue,
         production: -costProd,
@@ -111,9 +109,18 @@ function App() {
         commercial: -costCommercial,
         capex: -capexy,
         ebit,
-        grossMargin: revenue - costProd,
+        grossMargin: revenue - costProd
+      });
+
+      uData.push({
+        year: `Anno ${i + 1}`,
+        revSale,
+        salesUnits,
+        revRental,
         fleet: rentalFleet,
-        unitsSold: salesUnits
+        newFleetUnits: newRentalUnits,
+        contracts: rentalFleet * config.rentalYieldMonths,
+        unitsProduced
       });
     }
 
@@ -121,15 +128,16 @@ function App() {
       { name: 'Produzione & Accessori', value: totProd, color: '#64748b' },
       { name: 'Logistica (Sped/Ritiri)', value: totLog, color: '#ea580c' },
       { name: 'Personale', value: totPers, color: '#2563eb' },
-      { name: 'Commerciale (Provvigioni)', value: totComm, color: '#059669' },
+      { name: 'Commerciale', value: totComm, color: '#059669' },
     ];
 
-    const totalEbit = data.reduce((acc, curr) => acc + curr.ebit, 0);
+    const totalEbit = fData.reduce((acc, curr) => acc + curr.ebit, 0);
 
     return { 
-      financialData: data, 
+      financialData: fData, 
+      unitData: uData,
       totals: totalOpex,
-      kpis: { totalEbit, finalFleet: data[4].fleet }
+      kpis: { totalEbit, finalFleet: uData[4].fleet, totalUnitsProducedOverall }
     };
   }, [config]);
 
@@ -138,16 +146,18 @@ function App() {
       <header className="header">
         <div className="header-title">
           <h1><span className="blue">MOVION</span> <span className="orange">Business Plan</span></h1>
-          <p>Dashboard Dinamica e Simulatore a 5 Anni</p>
+          <p>Dashboard Dinamica & Generatore di Report</p>
           <div className="badges-row">
             <span className="badge blue">Modello Interattivo</span>
             <span className="badge orange">Noleggio 70% / Vendita 30%</span>
-            <span className="badge green">Dati in Tempo Reale</span>
           </div>
         </div>
         <div className="header-actions">
           <button className="outline" onClick={() => setShowSettings(!showSettings)}>
-            <Settings size={18} /> Modifica Variabili
+            <Settings size={18} /> Variabili
+          </button>
+          <button onClick={() => window.print()}>
+            <Download size={18} /> Scarica PDF
           </button>
         </div>
       </header>
@@ -159,27 +169,27 @@ function App() {
             <input type="number" name="targetRevenueY5" value={config.targetRevenueY5} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Prezzo di Vendita Unitario (€)</label>
+            <label>Prezzo Vendita Unitario (€)</label>
             <input type="number" name="priceSale" value={config.priceSale} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Tariffa Noleggio (Mese) (€)</label>
+            <label>Tariffa Noleggio Mensile (€)</label>
             <input type="number" name="priceRental" value={config.priceRental} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Mesi di Rotazione Annua</label>
+            <label>Mesi Rotazione Annua</label>
             <input type="number" name="rentalYieldMonths" value={config.rentalYieldMonths} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Costo Produzione Unitario (€)</label>
+            <label>Costo Produzione (BOM) (€)</label>
             <input type="number" name="costProduction" value={config.costProduction} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Costo Logistica x Spedizione (€)</label>
+            <label>Costo Spedizione/Ritiro (€)</label>
             <input type="number" name="costLogistics" value={config.costLogistics} onChange={handleChange} />
           </div>
           <div className="setting-group">
-            <label>Costo Personale Unitario Annuo (€)</label>
+            <label>Costo Personale Annuo (€)</label>
             <input type="number" name="personnelCost" value={config.personnelCost} onChange={handleChange} />
           </div>
           <div className="setting-group">
@@ -215,19 +225,21 @@ function App() {
           colorClass="orange"
         />
         <StatCard 
-          title="Costo Produzione Unitario" 
-          value={`€ ${config.costProduction}`} 
+          title="Unità da Produrre (5A)" 
+          value={Math.round(kpis.totalUnitsProducedOverall)} 
           icon={BarChart3} 
+          trend="up"
+          trendValue={`A € ${config.costProduction} cad.`}
           colorClass="gray"
         />
       </div>
 
       <div className="charts-section">
-        <div className="chart-container">
+        <div className="chart-container" style={{ height: '420px' }}>
           <div className="chart-header">
             <h3><BarChart3 size={20} className="blue" /> Crescita Ricavi vs EBIT (5 Anni)</h3>
           </div>
-          <ResponsiveContainer width="100%" height={320}>
+          <ResponsiveContainer width="100%" height="80%">
             <BarChart data={financialData} margin={{ top: 20, right: 10, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
               <XAxis dataKey="year" stroke="#64748b" />
@@ -243,11 +255,11 @@ function App() {
           </ResponsiveContainer>
         </div>
 
-        <div className="chart-container">
+        <div className="chart-container" style={{ height: '420px' }}>
           <div className="chart-header">
             <h3><PieChartIcon size={20} className="orange" /> Ripartizione Costi (Totale 5A)</h3>
           </div>
-          <ResponsiveContainer width="100%" height={320}>
+          <ResponsiveContainer width="100%" height="80%">
             <PieChart>
               <Pie
                 data={totals}
@@ -273,9 +285,9 @@ function App() {
         </div>
       </div>
 
-      <div className="chart-container" style={{ height: 'auto', marginBottom: '2.5rem' }}>
+      <div className="chart-container" style={{ height: 'auto' }}>
         <div className="chart-header">
-          <h3><Activity size={20} className="green" /> Dettaglio Conto Economico di Sintesi (Ricalcolo Dinamico)</h3>
+          <h3><Activity size={20} className="green" /> Dettaglio Conto Economico di Sintesi</h3>
         </div>
         <div style={{ overflowX: 'auto' }}>
           <table className="financial-table">
@@ -295,7 +307,7 @@ function App() {
                 {financialData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{formatCurrency(d.revenue)}</td>)}
               </tr>
               <tr>
-                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi di Produzione (€{config.costProduction}/pz)</td>
+                <td style={{ paddingLeft: '20px', color: '#64748b' }}>Costi Produzione (€{config.costProduction}/pz)</td>
                 {financialData.map((d, i) => <td key={i} className="negative">{formatCurrency(d.production)}</td>)}
               </tr>
               <tr style={{ backgroundColor: '#f8fafc' }}>
@@ -337,6 +349,103 @@ function App() {
               <tr>
                 <td style={{ fontSize: '0.85rem', color: '#64748b' }}>% EBIT Margin</td>
                 {financialData.map((d, i) => <td key={i} className={d.ebit < 0 ? "danger" : "percent"} style={{ fontWeight: 600, fontSize: '0.9rem' }}>{((d.ebit / d.revenue)*100).toFixed(1)}%</td>)}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="chart-container" style={{ height: 'auto' }}>
+        <div className="chart-header">
+          <h3><Package size={20} className="orange" /> Analisi Unità e Composizione Flotta (Dinamica)</h3>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="financial-table" style={{ marginBottom: '2rem' }}>
+            <thead>
+              <tr>
+                <th colSpan={6} style={{ textAlign: 'left', backgroundColor: '#eff6ff', color: '#1d4ed8' }}>VENDITE DIREZIONALI</th>
+              </tr>
+              <tr>
+                <th>Voce Descrittiva</th>
+                <th>Anno 1</th>
+                <th>Anno 2</th>
+                <th>Anno 3</th>
+                <th>Anno 4</th>
+                <th>Anno 5</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ color: '#64748b' }}>Ricavi Vendita (30%)</td>
+                {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revSale)}</td>)}
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600 }}>Unità Vendute</td>
+                {unitData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{Math.round(d.salesUnits)}</td>)}
+              </tr>
+            </tbody>
+          </table>
+
+          <table className="financial-table" style={{ marginBottom: '2rem' }}>
+            <thead>
+              <tr>
+                <th colSpan={6} style={{ textAlign: 'left', backgroundColor: '#fff7ed', color: '#c2410c' }}>NOLEGGI A PAZIENTI</th>
+              </tr>
+              <tr>
+                <th>Voce Descrittiva</th>
+                <th>Anno 1</th>
+                <th>Anno 2</th>
+                <th>Anno 3</th>
+                <th>Anno 4</th>
+                <th>Anno 5</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ color: '#64748b' }}>Ricavi Noleggio (70%)</td>
+                {unitData.map((d, i) => <td key={i}>{formatCurrency(d.revRental)}</td>)}
+              </tr>
+              <tr>
+                <td style={{ fontWeight: 600 }}>Apparecchi in Flotta Noleggio (Totali)</td>
+                {unitData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{Math.round(d.fleet)}</td>)}
+              </tr>
+              <tr>
+                <td style={{ color: '#64748b', fontStyle: 'italic' }}>Mesi Fatturati (Contratti Generati)</td>
+                {unitData.map((d, i) => <td key={i} style={{ fontStyle: 'italic' }}>{Math.round(d.contracts)}</td>)}
+              </tr>
+            </tbody>
+          </table>
+
+          <table className="financial-table">
+            <thead>
+              <tr>
+                <th colSpan={7} style={{ textAlign: 'left', backgroundColor: '#ecfdf5', color: '#047857' }}>FABBISOGNO DI PRODUZIONE</th>
+              </tr>
+              <tr>
+                <th>Voce Descrittiva</th>
+                <th>Anno 1</th>
+                <th>Anno 2</th>
+                <th>Anno 3</th>
+                <th>Anno 4</th>
+                <th>Anno 5</th>
+                <th>Totale</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ color: '#64748b' }}>Unità per Vendita</td>
+                {unitData.map((d, i) => <td key={i}>{Math.round(d.salesUnits)}</td>)}
+                <td style={{ fontWeight: 600 }}>{Math.round(unitData.reduce((acc, curr) => acc + curr.salesUnits, 0))}</td>
+              </tr>
+              <tr>
+                <td style={{ color: '#64748b' }}>Nuove Unità per Flotta Noleggio</td>
+                {unitData.map((d, i) => <td key={i}>{Math.round(d.newFleetUnits)}</td>)}
+                <td style={{ fontWeight: 600 }}>{Math.round(unitData.reduce((acc, curr) => acc + curr.newFleetUnits, 0))}</td>
+              </tr>
+              <tr style={{ backgroundColor: '#f8fafc' }}>
+                <td style={{ fontWeight: 600 }}>Totale Unità da Produrre</td>
+                {unitData.map((d, i) => <td key={i} style={{ fontWeight: 600 }}>{Math.round(d.unitsProduced)}</td>)}
+                <td style={{ fontWeight: 700, color: '#059669' }}>{Math.round(kpis.totalUnitsProducedOverall)}</td>
               </tr>
             </tbody>
           </table>
