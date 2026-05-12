@@ -59,6 +59,7 @@ function App() {
     costLogistics: 50,
     commercialPercent: 15,
     maintenancePercent: 3,
+    structurePercent: 10,
     insuranceAnnual: 5000,
     personnelCost: 37500,
     personnelInflation: 2,
@@ -117,13 +118,14 @@ function App() {
     const cPersInf = Number(config.personnelInflation) || 0;
     const cComm = Number(config.commercialPercent) || 0;
     const cMaint = Number(config.maintenancePercent) || 0;
+    const cStruct = Number(config.structurePercent) || 0;
     const cInsurance = Number(config.insuranceAnnual) || 0;
     
     const cCapex = (Number(config.capexElectronics)||0) + (Number(config.capexIT)||0) + (Number(config.capexMarketing)||0);
 
     let fData = [];
     let uData = [];
-    let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totIns = 0;
+    let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totStruct = 0, totIns = 0;
     let totRevSaleOverall = 0, totRevRentalOverall = 0;
     
     let totalUnitsProducedOverall = 0;
@@ -157,15 +159,17 @@ function App() {
       let costPersonnel = personnelGrowth[i] * cPers * Math.pow(1 + (cPersInf / 100), i);
       let costCommercial = revenue * (cComm / 100);
       let costMaintenance = revenue * (cMaint / 100);
+      let costStructure = revenue * (cStruct / 100);
       let capexy = i === 0 ? cCapex : 0;
       
-      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - costMaintenance - cInsurance - capexy;
+      let ebit = revenue - costProd - costLogistics - costPersonnel - costCommercial - costMaintenance - costStructure - cInsurance - capexy;
       
       totProd += costProd;
       totLog += costLogistics;
       totPers += costPersonnel;
       totComm += costCommercial;
       totMaint += costMaintenance;
+      totStruct += costStructure;
       totIns += cInsurance;
       totalUnitsProducedOverall += unitsProduced;
       totRevSaleOverall += revSale;
@@ -179,6 +183,7 @@ function App() {
         personnel: -costPersonnel,
         commercial: -costCommercial,
         maintenance: -costMaintenance,
+        structure: -costStructure,
         insurance: -cInsurance,
         capex: -capexy,
         ebit,
@@ -376,6 +381,10 @@ function App() {
               <div className="setting-group">
                 <label>Costo Manutenzione (%)</label>
                 <input type="number" name="maintenancePercent" value={config.maintenancePercent} onChange={handleChange} />
+              </div>
+              <div className="setting-group">
+                <label>Costi Struttura (%)</label>
+                <input type="number" name="structurePercent" value={config.structurePercent} onChange={handleChange} />
               </div>
               <div className="setting-group">
                 <label>Assicurazione/Certif. Annua (€)</label>

@@ -198,6 +198,10 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
             {financialData.map((d, i) => <td key={i}>{formatCurrency(d.maintenance)}</td>)}
           </tr>
           <tr>
+            <td>Costi Struttura/Overhead</td>
+            {financialData.map((d, i) => <td key={i}>{formatCurrency(d.structure)}</td>)}
+          </tr>
+          <tr>
             <td>Assicurazioni/Cert. Annue</td>
             {financialData.map((d, i) => <td key={i}>{formatCurrency(d.insurance)}</td>)}
           </tr>
@@ -227,6 +231,7 @@ export default function ReportDinamico({ config, financialData, unitData, kpis }
           <tr><td>Costo Personale Annuo Unitario (Anno 1)</td><td>{formatCurrency(config.personnelCost)}/anno (inflazione {config.personnelInflation}%)</td></tr>
           <tr><td>Costi Commerciali / Provvigioni</td><td>{config.commercialPercent}% del Fatturato</td></tr>
           <tr><td>Costi Manutenzione / Ricambi</td><td>{config.maintenancePercent}% del Fatturato</td></tr>
+          <tr><td>Costi Struttura / Overhead</td><td>{config.structurePercent}% del Fatturato</td></tr>
           <tr><td>Costo Unitario Produzione (Device)</td><td>{formatCurrency(kpis.cProd)}</td></tr>
           <tr><td>Apparecchi in Flotta Noleggio (Anno 5)</td><td>{Math.round(kpis.finalFleet)} unità</td></tr>
           <tr className="highlight"><td><strong>EBIT Totale (Cumulato 5 Anni)</strong></td><td><strong>{formatCurrency(kpis.totalEbit)}</strong></td></tr>
