@@ -48,6 +48,7 @@ function App() {
   const defaultConfig = {
     salesY1: 18, salesY2: 36, salesY3: 54, salesY4: 72, salesY5: 90,
     fleetY1: 70, fleetY2: 140, fleetY3: 210, fleetY4: 280, fleetY5: 350,
+    empY1: 3, empY2: 4, empY3: 5, empY4: 6, empY5: 6,
     priceSale: 5000,
     priceRental: 300,
     rentalYieldMonths: 10,
@@ -104,6 +105,7 @@ function App() {
   const { financialData, unitData, totals, kpis } = useMemo(() => {
     const salesArr = [Number(config.salesY1)||0, Number(config.salesY2)||0, Number(config.salesY3)||0, Number(config.salesY4)||0, Number(config.salesY5)||0];
     const fleetArr = [Number(config.fleetY1)||0, Number(config.fleetY2)||0, Number(config.fleetY3)||0, Number(config.fleetY4)||0, Number(config.fleetY5)||0];
+    const personnelGrowth = [Number(config.empY1)||0, Number(config.empY2)||0, Number(config.empY3)||0, Number(config.empY4)||0, Number(config.empY5)||0];
     
     const pSale = Number(config.priceSale) || 1;
     const pRental = Number(config.priceRental) || 1;
@@ -124,7 +126,6 @@ function App() {
     let totProd = 0, totLog = 0, totPers = 0, totComm = 0, totMaint = 0, totIns = 0;
     let totRevSaleOverall = 0, totRevRentalOverall = 0;
     
-    const personnelGrowth = [3, 4, 5, 6, 6];
     let totalUnitsProducedOverall = 0;
 
     for (let i = 0; i < 5; i++) {
@@ -303,6 +304,14 @@ function App() {
                       <td><input type="number" name="fleetY5" value={config.fleetY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
                     </tr>
                     <tr>
+                      <td>N° Dipendenti</td>
+                      <td><input type="number" name="empY1" value={config.empY1} onChange={handleChange} title="Anno 1" placeholder="Y1"/></td>
+                      <td><input type="number" name="empY2" value={config.empY2} onChange={handleChange} title="Anno 2" placeholder="Y2"/></td>
+                      <td><input type="number" name="empY3" value={config.empY3} onChange={handleChange} title="Anno 3" placeholder="Y3"/></td>
+                      <td><input type="number" name="empY4" value={config.empY4} onChange={handleChange} title="Anno 4" placeholder="Y4"/></td>
+                      <td><input type="number" name="empY5" value={config.empY5} onChange={handleChange} title="Anno 5" placeholder="Y5"/></td>
+                    </tr>
+                    <tr>
                       <td>Fatturato Dinamico</td>
                       <td style={{textAlign: 'center', fontWeight: '600', color: '#0ea5e9'}}>{financialData[0]?.revenue ? formatCurrency(financialData[0].revenue) : '€ 0'}</td>
                       <td style={{textAlign: 'center', fontWeight: '600', color: '#0ea5e9'}}>{financialData[1]?.revenue ? formatCurrency(financialData[1].revenue) : '€ 0'}</td>
@@ -377,6 +386,9 @@ function App() {
             {/* GRUPPO 5 */}
             <div className="setting-card group-indigo">
               <h3><PieChartIcon size={18}/> Risorse Umane</h3>
+              <p style={{fontSize: '0.8em', color: '#64748b', marginBottom: '10px'}}>
+                <em>Il numero dei dipendenti per ogni anno si imposta nella grande Tabella dei Volumi in alto.</em>
+              </p>
               <div className="setting-group">
                 <label>Costo Personale Annuo (€)</label>
                 <input type="number" name="personnelCost" value={config.personnelCost} onChange={handleChange} />
